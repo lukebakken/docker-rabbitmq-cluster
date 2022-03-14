@@ -1,62 +1,79 @@
 version: '3'
 
-services:
+networks:
+  rabbitnet:
+    name: rabbitnet
+    driver: bridge
 
+services:
   consul:
     image: consul:latest
     hostname: consul
+    networks:
+      rabbitnet:
+        aliases:
+          - consul.rabbit.local
     ports:
       - 8500:8500
-
   rabbitmq1:
     image: rabbitmq:3-management
     hostname: rabbitmq1
+    networks:
+      rabbitnet:
+        aliases:
+          - rabbitmq1.rabbit.local
     depends_on:
       - consul
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
-      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+      - LOG=debug
     volumes:
       - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq-env.conf:/etc/rabbitmq/rabbitmq-env.conf
       - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
-
   rabbitmq2:
     image: rabbitmq:3-management
     hostname: rabbitmq2
+    networks:
+      rabbitnet:
+        aliases:
+          - rabbitmq2.rabbit.local
     depends_on:
       - consul
-      - rabbitmq1
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
-      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+      - LOG=debug
     volumes:
       - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq-env.conf:/etc/rabbitmq/rabbitmq-env.conf
       - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
-
   rabbitmq3:
     image: rabbitmq:3-management
     hostname: rabbitmq3
+    networks:
+      rabbitnet:
+        aliases:
+          - rabbitmq3.rabbit.local
     depends_on:
       - consul
-      - rabbitmq1
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
-      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+      - LOG=debug
     volumes:
       - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq-env.conf:/etc/rabbitmq/rabbitmq-env.conf
       - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
-
   haproxy:
     image: haproxy:latest
+    hostname: haproxy
+    networks:
+      rabbitnet:
+        aliases:
+          - haproxy.rabbit.local
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
+      - consul
       - rabbitmq1
       - rabbitmq2
       - rabbitmq3
