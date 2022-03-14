@@ -19,6 +19,8 @@ services:
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
     volumes:
       - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
 
   rabbitmq2:
     image: rabbitmq:3-management
@@ -31,9 +33,9 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
     volumes:
-      - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
       - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
-    entrypoint: /usr/local/bin/cluster-entrypoint.sh
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
 
   rabbitmq3:
     image: rabbitmq:3-management
@@ -46,9 +48,9 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
     volumes:
-      - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
       - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
-    entrypoint: /usr/local/bin/cluster-entrypoint.sh
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
 
   haproxy:
     image: haproxy:latest
