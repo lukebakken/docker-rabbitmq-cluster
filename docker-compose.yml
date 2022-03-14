@@ -2,39 +2,56 @@ version: '3'
 
 services:
 
+  consul:
+    image: consul:latest
+    hostname: consul
+    ports:
+      - 8500:8500
+
   rabbitmq1:
     image: rabbitmq:3-management
     hostname: rabbitmq1
+    depends_on:
+      - consul
     environment:
-      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+    volumes:
+      - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
 
   rabbitmq2:
     image: rabbitmq:3-management
     hostname: rabbitmq2
     depends_on:
+      - consul
       - rabbitmq1
     environment:
-      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
     volumes:
       - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
+      - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
     entrypoint: /usr/local/bin/cluster-entrypoint.sh
 
   rabbitmq3:
     image: rabbitmq:3-management
     hostname: rabbitmq3
     depends_on:
+      - consul
       - rabbitmq1
     environment:
-      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
     volumes:
       - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
+      - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
     entrypoint: /usr/local/bin/cluster-entrypoint.sh
-    
+
   haproxy:
-    image: haproxy:1.7
+    image: haproxy:latest
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:

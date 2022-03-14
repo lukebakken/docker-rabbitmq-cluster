@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
@@ -6,6 +6,10 @@ set -e
 # This will ensure that environment variables passed
 # will be honored
 /usr/local/bin/docker-entrypoint.sh rabbitmq-server -detached
+
+sleep 1
+
+rabbitmqctl await_startup
 
 # Do the cluster dance
 rabbitmqctl stop_app
@@ -17,7 +21,7 @@ rabbitmqctl join_cluster rabbit@rabbitmq1
 rabbitmqctl stop
 
 # Wait a while for the app to really stop
-sleep 2s
+sleep 2
 
 # Start it
 rabbitmq-server
