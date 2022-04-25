@@ -15,6 +15,8 @@ services:
           - rmq0-ds.rmq.local
     environment:
       - LOG=debug
+    volumes:
+      - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
   rmq1-ds:
     image: vesc-1034:latest
     hostname: rmq1-ds
@@ -24,6 +26,8 @@ services:
           - rmq1-ds.rmq.local
     environment:
       - LOG=debug
+    volumes:
+      - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
   rmq2-ds:
     image: vesc-1034:latest
     hostname: rmq2-ds
@@ -33,19 +37,72 @@ services:
           - rmq2-ds.rmq.local
     environment:
       - LOG=debug
-  haproxy:
-    image: haproxy:latest
-    hostname: haproxy
+    volumes:
+      - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
+  rmq0-us:
+    image: vesc-1034:latest
+    hostname: rmq0-us
     networks:
       rabbitnet:
         aliases:
-          - haproxy.local
+          - rmq0-us.rmq.local
+    environment:
+      - LOG=debug
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
+  rmq1-us:
+    image: vesc-1034:latest
+    hostname: rmq1-us
+    networks:
+      rabbitnet:
+        aliases:
+          - rmq1-us.rmq.local
+    environment:
+      - LOG=debug
+    volumes:
+      - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
+  rmq2-us:
+    image: vesc-1034:latest
+    hostname: rmq2-us
+    networks:
+      rabbitnet:
+        aliases:
+          - rmq2-us.rmq.local
+    environment:
+      - LOG=debug
+    volumes:
+      - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
+  haproxy-ds:
+    image: haproxy:latest
+    hostname: haproxy-ds
+    networks:
+      rabbitnet:
+        aliases:
+          - haproxy-ds.local
+    volumes:
+      - ./haproxy-ds.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
       - rmq0-ds
       - rmq1-ds
       - rmq2-ds
     ports:
+      # HOST:CONTAINER
       - 15672:15672
       - 5672:5672
+  haproxy-us:
+    image: haproxy:latest
+    hostname: haproxy-us
+    networks:
+      rabbitnet:
+        aliases:
+          - haproxy-us.local
+    volumes:
+      - ./haproxy-us.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - rmq0-us
+      - rmq1-us
+      - rmq2-us
+    ports:
+      # HOST:CONTAINER
+      - 15682:15672
+      - 5682:5672
