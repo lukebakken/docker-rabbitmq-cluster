@@ -53,7 +53,18 @@
       "pattern": "^federated",
       "apply-to": "exchanges",
       "definition": {
-        "federation-upstream": "RMQ-US"
+        "federation-upstream": "RMQ-US",
+        "ha-mode": "all"
+      },
+      "priority": 10
+    },
+    {
+      "vhost": "/",
+      "name": "ha-all",
+      "pattern": ".*",
+      "apply-to": "queues",
+      "definition": {
+        "ha-mode": "all"
       },
       "priority": 0
     }
