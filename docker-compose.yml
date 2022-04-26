@@ -17,6 +17,7 @@ services:
       - LOG=debug
     volumes:
       - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
+      - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
   rmq1-ds:
     image: vesc-1034:latest
     hostname: rmq1-ds
@@ -28,6 +29,7 @@ services:
       - LOG=debug
     volumes:
       - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
+      - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
   rmq2-ds:
     image: vesc-1034:latest
     hostname: rmq2-ds
@@ -39,6 +41,7 @@ services:
       - LOG=debug
     volumes:
       - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
+      - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
   rmq0-us:
     image: vesc-1034:latest
     hostname: rmq0-us
@@ -50,6 +53,7 @@ services:
       - LOG=debug
     volumes:
       - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
+      - ./defs-us.json:/var/lib/rabbitmq/definitions.json
   rmq1-us:
     image: vesc-1034:latest
     hostname: rmq1-us
@@ -61,6 +65,7 @@ services:
       - LOG=debug
     volumes:
       - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
+      - ./defs-us.json:/var/lib/rabbitmq/definitions.json
   rmq2-us:
     image: vesc-1034:latest
     hostname: rmq2-us
@@ -72,6 +77,7 @@ services:
       - LOG=debug
     volumes:
       - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
+      - ./defs-us.json:/var/lib/rabbitmq/definitions.json
   haproxy-ds:
     image: haproxy:latest
     hostname: haproxy-ds

@@ -11,5 +11,6 @@ COPY --chown=rabbitmq:rabbitmq enabled_plugins /etc/rabbitmq/
 COPY --chown=rabbitmq:rabbitmq rabbitmq-env.conf /etc/rabbitmq/
 COPY --chown=rabbitmq:rabbitmq rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
 
+EXPOSE 5672
 EXPOSE 15672
 EXPOSE 25672
