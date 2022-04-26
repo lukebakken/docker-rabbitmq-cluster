@@ -80,8 +80,11 @@ services:
       - ./defs-us.json:/var/lib/rabbitmq/definitions.json
   perf-test-us-0:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-us.local
+      - --servers-startup-timeout=30
       - --rate=1
       - --producers=1
       - --consumers=0
@@ -93,8 +96,11 @@ services:
     restart: on-failure
   perf-test-us-1:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-us.local
+      - --servers-startup-timeout=30
       - --rate=1
       - --producers=1
       - --consumers=0
@@ -106,8 +112,11 @@ services:
     restart: on-failure
   perf-test-us-2:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-us.local
+      - --servers-startup-timeout=30
       - --rate=1
       - --producers=1
       - --consumers=0
@@ -119,8 +128,11 @@ services:
     restart: on-failure
   perf-test-us-3:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-us.local
+      - --servers-startup-timeout=30
       - --rate=1
       - --producers=1
       - --consumers=0
@@ -132,8 +144,11 @@ services:
     restart: on-failure
   perf-test-us-4:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-us.local
+      - --servers-startup-timeout=30
       - --rate=1
       - --producers=1
       - --consumers=0
@@ -145,56 +160,71 @@ services:
     restart: on-failure
   perf-test-ds-0:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-ds.local
+      - --servers-startup-timeout=30
       - --producers=0
       - --consumers=1
       - --predeclared
-      - --queue=federated-0
+      - --queue=federated-ds-0
     depends_on:
       - haproxy-ds
     restart: on-failure
   perf-test-ds-1:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-ds.local
+      - --servers-startup-timeout=30
       - --producers=0
       - --consumers=1
       - --predeclared
-      - --queue=federated-1
+      - --queue=federated-ds-1
     depends_on:
       - haproxy-ds
     restart: on-failure
   perf-test-ds-2:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-ds.local
+      - --servers-startup-timeout=30
       - --producers=0
       - --consumers=1
       - --predeclared
-      - --queue=federated-2
+      - --queue=federated-ds-2
     depends_on:
       - haproxy-ds
     restart: on-failure
   perf-test-ds-3:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-ds.local
+      - --servers-startup-timeout=30
       - --producers=0
       - --consumers=1
       - --predeclared
-      - --queue=federated-3
+      - --queue=federated-ds-3
     depends_on:
       - haproxy-ds
     restart: on-failure
   perf-test-ds-4:
     image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
     command:
       - --uri=amqp://haproxy-ds.local
+      - --servers-startup-timeout=30
       - --producers=0
       - --consumers=1
       - --predeclared
-      - --queue=federated-4
+      - --queue=federated-ds-4
     depends_on:
       - haproxy-ds
     restart: on-failure
