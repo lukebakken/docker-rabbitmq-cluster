@@ -33,9 +33,11 @@
     {
       "value": {
         "ack-mode": "on-confirm",
-        "prefetch-count": 10,
-        "trust-user-id": false,
-        "uri": "amqp://rmq0-us.rmq.local:5672"
+        "max-hops": 1,
+        "message-ttl": 259200000,
+        "prefetch-count": 1000,
+        "trust-user-id": true,
+        "uri": ["amqp://rmq0-us.local:5672", "amqp://rmq1-us.local:5672", "amqp://rmq2-us.local:5672"]
       },
       "vhost": "/",
       "component": "federation-upstream",
@@ -58,13 +60,34 @@
   ],
   "queues": [
     {
-      "name": "federated-ds",
+      "name": "federated-ds-0",
       "vhost": "/",
       "durable": true,
-      "auto_delete": false,
-      "arguments": {
-        "x-queue-type": "quorum"
-      }
+      "auto_delete": false
+    },
+    {
+      "name": "federated-ds-1",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false
+    },
+    {
+      "name": "federated-ds-2",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false
+    },
+    {
+      "name": "federated-ds-3",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false
+    },
+    {
+      "name": "federated-ds-4",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false
     }
   ],
   "exchanges": [
@@ -82,9 +105,41 @@
     {
       "source": "federated-direct",
       "vhost": "/",
-      "destination": "federated-ds",
+      "destination": "federated-ds-0",
       "destination_type": "queue",
-      "routing_key": "federated",
+      "routing_key": "federated-0",
+      "arguments": {}
+    },
+    {
+      "source": "federated-direct",
+      "vhost": "/",
+      "destination": "federated-ds-1",
+      "destination_type": "queue",
+      "routing_key": "federated-1",
+      "arguments": {}
+    },
+    {
+      "source": "federated-direct",
+      "vhost": "/",
+      "destination": "federated-ds-2",
+      "destination_type": "queue",
+      "routing_key": "federated-2",
+      "arguments": {}
+    },
+    {
+      "source": "federated-direct",
+      "vhost": "/",
+      "destination": "federated-ds-3",
+      "destination_type": "queue",
+      "routing_key": "federated-3",
+      "arguments": {}
+    },
+    {
+      "source": "federated-direct",
+      "vhost": "/",
+      "destination": "federated-ds-4",
+      "destination_type": "queue",
+      "routing_key": "federated-4",
       "arguments": {}
     }
   ]

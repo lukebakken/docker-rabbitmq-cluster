@@ -12,7 +12,7 @@ services:
     networks:
       rabbitnet:
         aliases:
-          - rmq0-ds.rmq.local
+          - rmq0-ds.local
     environment:
       - LOG=debug
     volumes:
@@ -24,7 +24,7 @@ services:
     networks:
       rabbitnet:
         aliases:
-          - rmq1-ds.rmq.local
+          - rmq1-ds.local
     environment:
       - LOG=debug
     volumes:
@@ -36,7 +36,7 @@ services:
     networks:
       rabbitnet:
         aliases:
-          - rmq2-ds.rmq.local
+          - rmq2-ds.local
     environment:
       - LOG=debug
     volumes:
@@ -48,7 +48,7 @@ services:
     networks:
       rabbitnet:
         aliases:
-          - rmq0-us.rmq.local
+          - rmq0-us.local
     environment:
       - LOG=debug
     volumes:
@@ -60,7 +60,7 @@ services:
     networks:
       rabbitnet:
         aliases:
-          - rmq1-us.rmq.local
+          - rmq1-us.local
     environment:
       - LOG=debug
     volumes:
@@ -72,15 +72,134 @@ services:
     networks:
       rabbitnet:
         aliases:
-          - rmq2-us.rmq.local
+          - rmq2-us.local
     environment:
       - LOG=debug
     volumes:
       - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
       - ./defs-us.json:/var/lib/rabbitmq/definitions.json
+  perf-test-us-0:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-us.local
+      - --rate=1
+      - --producers=1
+      - --consumers=0
+      - --predeclared
+      - --exchange=federated-direct
+      - --routing-key=federated-0
+    depends_on:
+      - haproxy-us
+    restart: on-failure
+  perf-test-us-1:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-us.local
+      - --rate=1
+      - --producers=1
+      - --consumers=0
+      - --predeclared
+      - --exchange=federated-direct
+      - --routing-key=federated-1
+    depends_on:
+      - haproxy-us
+    restart: on-failure
+  perf-test-us-2:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-us.local
+      - --rate=1
+      - --producers=1
+      - --consumers=0
+      - --predeclared
+      - --exchange=federated-direct
+      - --routing-key=federated-2
+    depends_on:
+      - haproxy-us
+    restart: on-failure
+  perf-test-us-3:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-us.local
+      - --rate=1
+      - --producers=1
+      - --consumers=0
+      - --predeclared
+      - --exchange=federated-direct
+      - --routing-key=federated-3
+    depends_on:
+      - haproxy-us
+    restart: on-failure
+  perf-test-us-4:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-us.local
+      - --rate=1
+      - --producers=1
+      - --consumers=0
+      - --predeclared
+      - --exchange=federated-direct
+      - --routing-key=federated-4
+    depends_on:
+      - haproxy-us
+    restart: on-failure
+  perf-test-ds-0:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-ds.local
+      - --producers=0
+      - --consumers=1
+      - --predeclared
+      - --queue=federated-0
+    depends_on:
+      - haproxy-ds
+    restart: on-failure
+  perf-test-ds-1:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-ds.local
+      - --producers=0
+      - --consumers=1
+      - --predeclared
+      - --queue=federated-1
+    depends_on:
+      - haproxy-ds
+    restart: on-failure
+  perf-test-ds-2:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-ds.local
+      - --producers=0
+      - --consumers=1
+      - --predeclared
+      - --queue=federated-2
+    depends_on:
+      - haproxy-ds
+    restart: on-failure
+  perf-test-ds-3:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-ds.local
+      - --producers=0
+      - --consumers=1
+      - --predeclared
+      - --queue=federated-3
+    depends_on:
+      - haproxy-ds
+    restart: on-failure
+  perf-test-ds-4:
+    image: pivotalrabbitmq/perf-test:latest
+    command:
+      - --uri=amqp://haproxy-ds.local
+      - --producers=0
+      - --consumers=1
+      - --predeclared
+      - --queue=federated-4
+    depends_on:
+      - haproxy-ds
+    restart: on-failure
   haproxy-ds:
     image: haproxy:latest
-    hostname: haproxy-ds
     networks:
       rabbitnet:
         aliases:
@@ -97,7 +216,6 @@ services:
       - 5672:5672
   haproxy-us:
     image: haproxy:latest
-    hostname: haproxy-us
     networks:
       rabbitnet:
         aliases:
