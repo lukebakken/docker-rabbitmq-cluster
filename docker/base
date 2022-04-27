@@ -1,0 +1,9 @@
+FROM rabbitmq:3-management
+
+RUN apt-get clean && \
+    apt-get update && \
+    apt-get upgrade --yes --fix-broken --fix-missing --verbose-versions && \
+    apt-get install --yes --fix-broken --fix-missing --verbose-versions --no-install-recommends \
+      dnsutils inetutils-ping iproute2
+
+EXPOSE 4369 5672 15692 25672 35672-35682
