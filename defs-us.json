@@ -32,18 +32,7 @@
   "parameters": [],
   "global_parameters": [
   ],
-  "policies": [
-    {
-      "vhost": "/",
-      "name": "ha-all",
-      "pattern": ".*",
-      "apply-to": "queues",
-      "definition": {
-        "ha-mode": "all"
-      },
-      "priority": 0
-    }
-  ],
+  "policies": [],
   "queues": [
   ],
   "exchanges": [

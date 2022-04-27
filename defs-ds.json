@@ -37,7 +37,7 @@
         "message-ttl": 259200000,
         "prefetch-count": 1000,
         "trust-user-id": true,
-        "uri": ["amqp://rmq0-us.local:5672", "amqp://rmq1-us.local:5672", "amqp://rmq2-us.local:5672"]
+        "uri": "amqp://rmq0-us.local:5672"
       },
       "vhost": "/",
       "component": "federation-upstream",
@@ -53,20 +53,9 @@
       "pattern": "^federated",
       "apply-to": "exchanges",
       "definition": {
-        "federation-upstream": "RMQ-US",
-        "ha-mode": "all"
+        "federation-upstream": "RMQ-US"
       },
       "priority": 10
-    },
-    {
-      "vhost": "/",
-      "name": "ha-all",
-      "pattern": ".*",
-      "apply-to": "queues",
-      "definition": {
-        "ha-mode": "all"
-      },
-      "priority": 0
     }
   ],
   "queues": [

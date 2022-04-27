@@ -18,30 +18,6 @@ services:
     volumes:
       - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
       - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
-  rmq1-ds:
-    image: vesc-1034:latest
-    hostname: rmq1-ds
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq1-ds.local
-    environment:
-      - LOG=debug
-    volumes:
-      - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
-      - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
-  rmq2-ds:
-    image: vesc-1034:latest
-    hostname: rmq2-ds
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq2-ds.local
-    environment:
-      - LOG=debug
-    volumes:
-      - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
-      - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
   rmq0-us:
     image: vesc-1034:latest
     hostname: rmq0-us
@@ -49,30 +25,6 @@ services:
       rabbitnet:
         aliases:
           - rmq0-us.local
-    environment:
-      - LOG=debug
-    volumes:
-      - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
-      - ./defs-us.json:/var/lib/rabbitmq/definitions.json
-  rmq1-us:
-    image: vesc-1034:latest
-    hostname: rmq1-us
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq1-us.local
-    environment:
-      - LOG=debug
-    volumes:
-      - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
-      - ./defs-us.json:/var/lib/rabbitmq/definitions.json
-  rmq2-us:
-    image: vesc-1034:latest
-    hostname: rmq2-us
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq2-us.local
     environment:
       - LOG=debug
     volumes:
@@ -238,8 +190,6 @@ services:
       - ./haproxy-ds.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
       - rmq0-ds
-      - rmq1-ds
-      - rmq2-ds
     ports:
       # HOST:CONTAINER
       - 15672:15672
@@ -254,8 +204,6 @@ services:
       - ./haproxy-us.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
       - rmq0-us
-      - rmq1-us
-      - rmq2-us
     ports:
       # HOST:CONTAINER
       - 15682:15672
