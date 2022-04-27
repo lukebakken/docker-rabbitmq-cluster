@@ -91,6 +91,8 @@ services:
       - --predeclared
       - --exchange=federated-direct
       - --routing-key=federated-0
+      - --flag=persistent
+      - --flag=mandatory
     depends_on:
       - haproxy-us
     restart: on-failure
@@ -107,6 +109,8 @@ services:
       - --predeclared
       - --exchange=federated-direct
       - --routing-key=federated-1
+      - --flag=persistent
+      - --flag=mandatory
     depends_on:
       - haproxy-us
     restart: on-failure
@@ -123,6 +127,8 @@ services:
       - --predeclared
       - --exchange=federated-direct
       - --routing-key=federated-2
+      - --flag=persistent
+      - --flag=mandatory
     depends_on:
       - haproxy-us
     restart: on-failure
@@ -139,6 +145,8 @@ services:
       - --predeclared
       - --exchange=federated-direct
       - --routing-key=federated-3
+      - --flag=persistent
+      - --flag=mandatory
     depends_on:
       - haproxy-us
     restart: on-failure
@@ -155,6 +163,8 @@ services:
       - --predeclared
       - --exchange=federated-direct
       - --routing-key=federated-4
+      - --flag=persistent
+      - --flag=mandatory
     depends_on:
       - haproxy-us
     restart: on-failure
