@@ -6,267 +6,71 @@ networks:
     driver: bridge
 
 services:
-  rmq0-ds:
-    image: vesc-1034:latest
-    hostname: rmq0-ds
+  rmq0:
+    image: rabbitmq-local:latest
+    hostname: rmq0
     networks:
       rabbitnet:
         aliases:
-          - rmq0-ds.local
+          - rmq0.local
     environment:
       - LOG=debug
     volumes:
-      - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
-      - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
-  rmq1-ds:
-    image: vesc-1034:latest
-    hostname: rmq1-ds
+      - ./data/rmq0:/var/lib/rabbitmq/mnesia
+      - ./log/rmq0:/var/log/rabbitmq
+  rmq1:
+    image: rabbitmq-local:latest
+    hostname: rmq1
     networks:
       rabbitnet:
         aliases:
-          - rmq1-ds.local
+          - rmq1.local
     environment:
       - LOG=debug
     volumes:
-      - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
-      - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
-  rmq2-ds:
-    image: vesc-1034:latest
-    hostname: rmq2-ds
+      - ./data/rmq1:/var/lib/rabbitmq/mnesia
+      - ./log/rmq1:/var/log/rabbitmq
+  rmq2:
+    image: rabbitmq-local:latest
+    hostname: rmq2
     networks:
       rabbitnet:
         aliases:
-          - rmq2-ds.local
+          - rmq2.local
     environment:
       - LOG=debug
     volumes:
-      - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
-      - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
-  rmq0-us:
-    image: vesc-1034:latest
-    hostname: rmq0-us
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq0-us.local
-    environment:
-      - LOG=debug
-    volumes:
-      - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
-      - ./defs-us.json:/var/lib/rabbitmq/definitions.json
-  rmq1-us:
-    image: vesc-1034:latest
-    hostname: rmq1-us
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq1-us.local
-    environment:
-      - LOG=debug
-    volumes:
-      - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
-      - ./defs-us.json:/var/lib/rabbitmq/definitions.json
-  rmq2-us:
-    image: vesc-1034:latest
-    hostname: rmq2-us
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq2-us.local
-    environment:
-      - LOG=debug
-    volumes:
-      - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
-      - ./defs-us.json:/var/lib/rabbitmq/definitions.json
-  perf-test-us-0:
+      - ./data/rmq2:/var/lib/rabbitmq/mnesia
+      - ./log/rmq2:/var/log/rabbitmq
+  perf-test:
     image: pivotalrabbitmq/perf-test:latest
     networks:
       - rabbitnet
     command:
       - --uri=amqp://haproxy-us.local
       - --servers-startup-timeout=30
-      - --rate=1
-      - --producers=1
-      - --consumers=0
-      - --predeclared
-      - --exchange=federated-direct
-      - --routing-key=federated-0
+      - --rate=100
+      - --producers=6
+      - --consumers=6
       - --flag=persistent
       - --flag=mandatory
+      - --confirm=4
     depends_on:
       - haproxy-us
     restart: on-failure
-  perf-test-us-1:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy-us.local
-      - --servers-startup-timeout=30
-      - --rate=1
-      - --producers=1
-      - --consumers=0
-      - --predeclared
-      - --exchange=federated-direct
-      - --routing-key=federated-1
-      - --flag=persistent
-      - --flag=mandatory
-    depends_on:
-      - haproxy-us
-    restart: on-failure
-  perf-test-us-2:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy-us.local
-      - --servers-startup-timeout=30
-      - --rate=1
-      - --producers=1
-      - --consumers=0
-      - --predeclared
-      - --exchange=federated-direct
-      - --routing-key=federated-2
-      - --flag=persistent
-      - --flag=mandatory
-    depends_on:
-      - haproxy-us
-    restart: on-failure
-  perf-test-us-3:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy-us.local
-      - --servers-startup-timeout=30
-      - --rate=1
-      - --producers=1
-      - --consumers=0
-      - --predeclared
-      - --exchange=federated-direct
-      - --routing-key=federated-3
-      - --flag=persistent
-      - --flag=mandatory
-    depends_on:
-      - haproxy-us
-    restart: on-failure
-  perf-test-us-4:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy-us.local
-      - --servers-startup-timeout=30
-      - --rate=1
-      - --producers=1
-      - --consumers=0
-      - --predeclared
-      - --exchange=federated-direct
-      - --routing-key=federated-4
-      - --flag=persistent
-      - --flag=mandatory
-    depends_on:
-      - haproxy-us
-    restart: on-failure
-  perf-test-ds-0:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy-ds.local
-      - --servers-startup-timeout=30
-      - --producers=0
-      - --consumers=1
-      - --predeclared
-      - --queue=federated-ds-0
-    depends_on:
-      - haproxy-ds
-    restart: on-failure
-  perf-test-ds-1:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy-ds.local
-      - --servers-startup-timeout=30
-      - --producers=0
-      - --consumers=1
-      - --predeclared
-      - --queue=federated-ds-1
-    depends_on:
-      - haproxy-ds
-    restart: on-failure
-  perf-test-ds-2:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy-ds.local
-      - --servers-startup-timeout=30
-      - --producers=0
-      - --consumers=1
-      - --predeclared
-      - --queue=federated-ds-2
-    depends_on:
-      - haproxy-ds
-    restart: on-failure
-  perf-test-ds-3:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy-ds.local
-      - --servers-startup-timeout=30
-      - --producers=0
-      - --consumers=1
-      - --predeclared
-      - --queue=federated-ds-3
-    depends_on:
-      - haproxy-ds
-    restart: on-failure
-  perf-test-ds-4:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy-ds.local
-      - --servers-startup-timeout=30
-      - --producers=0
-      - --consumers=1
-      - --predeclared
-      - --queue=federated-ds-4
-    depends_on:
-      - haproxy-ds
-    restart: on-failure
-  haproxy-ds:
+  haproxy:
     image: haproxy:latest
     networks:
       rabbitnet:
         aliases:
-          - haproxy-ds.local
+          - haproxy.local
     volumes:
-      - ./haproxy-ds.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
-      - rmq0-ds
-      - rmq1-ds
-      - rmq2-ds
+      - rmq0
+      - rmq1
+      - rmq2
     ports:
       # HOST:CONTAINER
       - 15672:15672
       - 5672:5672
-  haproxy-us:
-    image: haproxy:latest
-    networks:
-      rabbitnet:
-        aliases:
-          - haproxy-us.local
-    volumes:
-      - ./haproxy-us.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    depends_on:
-      - rmq0-us
-      - rmq1-us
-      - rmq2-us
-    ports:
-      # HOST:CONTAINER
-      - 15682:15672
-      - 5682:5672
