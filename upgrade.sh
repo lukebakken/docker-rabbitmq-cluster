@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -o errexit
 set -o nounset
@@ -16,7 +16,5 @@ do
     docker exec "$container_id" /opt/rabbitmq/sbin/rabbitmq-upgrade drain
     docker compose stop "$SVC"
     sleep 5
-    docker compose "$SVC"
-    docker compose up --build "$SVC"
-    sleep 5
+    docker compose up --detach --build "$SVC"
 done
