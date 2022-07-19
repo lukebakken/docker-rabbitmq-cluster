@@ -47,7 +47,7 @@ services:
     networks:
       - rabbitnet
     command:
-      - --uri=amqp://haproxy-us.local
+      - --uri=amqp://haproxy.local
       - --servers-startup-timeout=30
       - --rate=100
       - --producers=6

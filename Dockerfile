@@ -1,4 +1,5 @@
-FROM rabbitmq:3-management
+ARG VERSION=3-management
+FROM rabbitmq:$VERSION
 
 COPY --chown=rabbitmq:rabbitmq --chmod=0400 erlang.cookie /var/lib/rabbitmq/.erlang.cookie
 COPY --chown=rabbitmq:rabbitmq enabled_plugins /etc/rabbitmq/
