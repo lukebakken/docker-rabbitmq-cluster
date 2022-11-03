@@ -1,10 +1,19 @@
-.PHONY: down image up
+.PHONY: clean down up perms rmq-perms
+
+RABBITMQ_DOCKER_TAG ?= 3-management
+
+clean: perms
+	git clean -xffd
 
 down:
 	docker compose down
 
-image:
-	docker build --pull --tag rabbitmq-local:latest .
+up: rmq-perms
+	docker compose build --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
+	docker compose up
 
-up:
-	docker compose up --detach
+perms:
+	sudo chown -R "$(USER):$(USER)" data log
+
+rmq-perms:
+	sudo chown -R '999:999' data log

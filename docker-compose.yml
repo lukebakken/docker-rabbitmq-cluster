@@ -7,7 +7,7 @@ networks:
 
 services:
   rmq0:
-    image: rabbitmq-local:latest
+    build: rmq
     hostname: rmq0
     networks:
       rabbitnet:
@@ -19,7 +19,7 @@ services:
       - ./data/rmq0:/var/lib/rabbitmq/mnesia
       - ./log/rmq0:/var/log/rabbitmq
   rmq1:
-    image: rabbitmq-local:latest
+    build: rmq
     hostname: rmq1
     networks:
       rabbitnet:
@@ -31,7 +31,7 @@ services:
       - ./data/rmq1:/var/lib/rabbitmq/mnesia
       - ./log/rmq1:/var/log/rabbitmq
   rmq2:
-    image: rabbitmq-local:latest
+    build: rmq
     hostname: rmq2
     networks:
       rabbitnet:
@@ -47,7 +47,7 @@ services:
     networks:
       - rabbitnet
     command:
-      - --uri=amqp://haproxy-us.local
+      - --uri=amqp://haproxy.local
       - --servers-startup-timeout=30
       - --rate=100
       - --producers=6
@@ -56,7 +56,7 @@ services:
       - --flag=mandatory
       - --confirm=4
     depends_on:
-      - haproxy-us
+      - haproxy
     restart: on-failure
   haproxy:
     image: haproxy:latest
