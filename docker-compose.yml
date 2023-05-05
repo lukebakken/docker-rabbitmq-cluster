@@ -47,12 +47,13 @@ services:
     networks:
       - rabbitnet
     command:
-      - --uris=amqp://rmq0.local,amqp://rmq1.local,amqp://rmq2.local
+      - --uri=amqp://haproxy.local
       - --servers-startup-timeout=45
       - --rate=100
       - --producers=10
       - --consumers=10
-      - --confirm=4
+      - --confirm=32
+      - --confirm-timeout=800
       - --flag=mandatory
       - --flag=persistent
       - --queue-args=x-queue-type=quorum
