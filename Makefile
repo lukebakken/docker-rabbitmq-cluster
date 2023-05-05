@@ -12,8 +12,8 @@ up: rmq-perms
 	# NB: fresh stuffs
 	# docker compose build --no-cache --pull --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
 	# docker compose up --pull always
-	docker compose build --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
-	docker compose up
+	docker compose build --no-cache --pull --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
+	docker compose up --pull always
 
 perms:
 	sudo chown -R "$(USER):$(USER)" data log
