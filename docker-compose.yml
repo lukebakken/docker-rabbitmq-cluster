@@ -5,7 +5,7 @@ networks:
 
 services:
   rmq0:
-    build: rmq
+    build: rmq0
     hostname: rmq0
     networks:
       rabbitnet:
@@ -17,7 +17,7 @@ services:
       - ./data/rmq0:/var/lib/rabbitmq/mnesia
       - ./log/rmq0:/var/log/rabbitmq
   rmq1:
-    build: rmq
+    build: rmq1
     hostname: rmq1
     networks:
       rabbitnet:
@@ -29,7 +29,7 @@ services:
       - ./data/rmq1:/var/lib/rabbitmq/mnesia
       - ./log/rmq1:/var/log/rabbitmq
   rmq2:
-    build: rmq
+    build: rmq2
     hostname: rmq2
     networks:
       rabbitnet:
