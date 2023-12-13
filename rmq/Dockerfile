@@ -1,5 +1,5 @@
-ARG RABBITMQ_DOCKER_TAG=3-management
-FROM rabbitmq:${RABBITMQ_DOCKER_TAG}
+ARG RABBITMQ_DOCKER_TAG=rabbitmq:3-management
+FROM ${RABBITMQ_DOCKER_TAG}
 
 # RUN apt-get update && apt-get install --yes --no-install-recommends curl
 
