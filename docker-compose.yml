@@ -1,18 +1,9 @@
 version: '3'
 
-networks:
-  rabbitnet:
-    name: rabbitnet
-    driver: bridge
-
 services:
   rmq0:
     build: rmq
     hostname: rmq0
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq0.local
     environment:
       - LOG=debug
     volumes:
@@ -21,10 +12,6 @@ services:
   rmq1:
     build: rmq
     hostname: rmq1
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq1.local
     environment:
       - LOG=debug
     volumes:
@@ -33,10 +20,6 @@ services:
   rmq2:
     build: rmq
     hostname: rmq2
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq2.local
     environment:
       - LOG=debug
     volumes:
@@ -44,10 +27,8 @@ services:
       - ./log/rmq2:/var/log/rabbitmq
   perf-test:
     image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
     command:
-      - --uri=amqp://haproxy.local
+      - --uri=amqp://haproxy
       - --servers-startup-timeout=45
       - --rate=100
       - --producers=10
@@ -68,11 +49,8 @@ services:
       - haproxy
     restart: on-failure
   haproxy:
+    hostname: haproxy
     image: haproxy:latest
-    networks:
-      rabbitnet:
-        aliases:
-          - haproxy.local
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
