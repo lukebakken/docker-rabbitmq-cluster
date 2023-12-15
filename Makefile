@@ -29,7 +29,7 @@ rmq2-cert: $(CURDIR)/tls-gen/basic/result/server_rmq2.local_certificate.pem
 
 certs: rmq0-cert rmq1-cert rmq2-cert
 
-up: certs rmq-perms
+up: rmq-perms
 	# NB: fresh stuffs
 	# docker compose build --no-cache --pull --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
 	# docker compose up --pull always
