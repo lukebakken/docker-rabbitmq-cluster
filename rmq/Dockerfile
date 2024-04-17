@@ -1,4 +1,5 @@
 ARG RABBITMQ_DOCKER_TAG=rabbitmq:3-management
+
 FROM ${RABBITMQ_DOCKER_TAG}
 
 ENV LOG=debug
