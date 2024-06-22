@@ -1,5 +1,3 @@
-version: '3'
-
 networks:
   rabbitnet:
     name: rabbitnet
@@ -58,7 +56,7 @@ services:
       - --flag=persistent
       - --queue-args=x-queue-type=quorum
       - --auto-delete=false
-      - --queue-pattern='perf-test-%03d'
+      - --queue-pattern=perf-test-%03d
       - --queue-pattern-from=0
       - --queue-pattern-to=9
     depends_on:
