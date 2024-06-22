@@ -1,7 +1,13 @@
 ARG RABBITMQ_DOCKER_TAG=rabbitmq:3-management
+
 FROM ${RABBITMQ_DOCKER_TAG}
 
-# RUN apt-get update && apt-get install --yes --no-install-recommends curl
+ENV LOG=debug
+
+RUN set -eux; \
+    export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update; \
+    apt-get install --yes --no-install-recommends curl tcpdump net-tools iproute2
 
 COPY --chown=rabbitmq:rabbitmq --chmod=0400 erlang.cookie /var/lib/rabbitmq/.erlang.cookie
 COPY --chown=rabbitmq:rabbitmq enabled_plugins /etc/rabbitmq/
