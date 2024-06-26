@@ -19,4 +19,10 @@ COPY --chown=rabbitmq:rabbitmq inter_node_tls.config /etc/rabbitmq/
 COPY --chown=rabbitmq:rabbitmq ca_certificate.pem /etc/rabbitmq/
 COPY --chown=rabbitmq:rabbitmq *rmq0.local*.pem /etc/rabbitmq/
 
+COPY --chmod=0755 custom-docker-entrypoint.sh /usr/local/bin/custom-docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/custom-docker-entrypoint.sh"]
+
 EXPOSE 4369 5671 5672 15671 15672 15692 25672 35672-35682
+
+CMD ["rabbitmq-server"]
