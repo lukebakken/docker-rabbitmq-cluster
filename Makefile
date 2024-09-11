@@ -1,8 +1,7 @@
 .PHONY: clean down up perms rmq-perms logs
 
 DOCKER_FRESH ?= false
-# RABBITMQ_DOCKER_TAG ?= rabbitmq:3-management
-RABBITMQ_DOCKER_TAG ?= pivotalrabbitmq/rabbitmq:tmp-branch-to-debug-peerdisc-in-docker
+RABBITMQ_DOCKER_TAG ?= rabbitmq:3-management
 
 clean: perms
 	git clean -xffd
