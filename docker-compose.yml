@@ -16,6 +16,9 @@ services:
     volumes:
       - ./data/rmq0:/var/lib/rabbitmq/mnesia
       - ./log/rmq0:/var/log/rabbitmq
+    ports:
+      # HOST:CONTAINER
+      - 15692:15692
   rmq1:
     build: rmq
     hostname: rmq1
@@ -28,6 +31,9 @@ services:
     volumes:
       - ./data/rmq1:/var/lib/rabbitmq/mnesia
       - ./log/rmq1:/var/log/rabbitmq
+    ports:
+      # HOST:CONTAINER
+      - 15693:15692
   rmq2:
     build: rmq
     hostname: rmq2
@@ -40,6 +46,9 @@ services:
     volumes:
       - ./data/rmq2:/var/lib/rabbitmq/mnesia
       - ./log/rmq2:/var/log/rabbitmq
+    ports:
+      # HOST:CONTAINER
+      - 15694:15692
   perf-test:
     image: pivotalrabbitmq/perf-test:latest
     networks:

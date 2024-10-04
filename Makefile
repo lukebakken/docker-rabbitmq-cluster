@@ -1,7 +1,7 @@
-.PHONY: clean down up perms rmq-perms
+.PHONY: clean down up perms rmq-perms enable-ff
 
 DOCKER_FRESH ?= false
-RABBITMQ_DOCKER_TAG ?= rabbitmq:3-management
+RABBITMQ_DOCKER_TAG ?= rabbitmq:4-management
 
 clean: perms
 	git clean -xffd
@@ -23,3 +23,6 @@ perms:
 
 rmq-perms:
 	sudo chown -R '999:999' data log
+
+enable-ff:
+	docker compose exec rmq0 rabbitmqctl enable_feature_flag all
