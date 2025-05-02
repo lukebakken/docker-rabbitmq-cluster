@@ -79,12 +79,12 @@ services:
     networks:
       - rabbitnet
     command:
-      - --uris=rabbitmq-stream://rmq0.local:5552,rabbitmq-stream://rmq1.local:5552,rabbitmq-stream:rmq2.local:5552
-      - --producers=1
-      - --consumers=1
-      - --rate=100
+      - --uris rabbitmq-stream://rmq0.local:5552,rabbitmq-stream://rmq1.local:5552,rabbitmq-stream:rmq2.local:5552
+      - --producers 1
+      - --consumers 1
+      - --rate 100
       - --delete-streams
-      - --max-age=PT30S
+      - --max-age PT30S
     depends_on:
       - rmq0
       - rmq1

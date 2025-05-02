@@ -1,4 +1,4 @@
-ARG RABBITMQ_DOCKER_TAG=rabbitmq:3-management
+ARG RABBITMQ_DOCKER_TAG=rabbitmq:4-management
 
 FROM ${RABBITMQ_DOCKER_TAG}
 
