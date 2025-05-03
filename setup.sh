@@ -12,7 +12,7 @@ function create_queues
     for ((i = start; i < end; i++))
     do
         port="$((15672 + (i % 3)))"
-        rabbitmqadmin --port $port declare queue --type quorum --name "qq-$i"
+        rabbitmqadmin --port "$port" declare queue --type quorum --name "qq-$i"
     done
 }
 

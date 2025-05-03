@@ -6,6 +6,10 @@ networks:
 x-rmq-common: &common-config
   build: rmq
   mem_limit: 4gb
+  ulimits:
+    nofile:
+      soft: 65536
+      hard: 131072
 
 services:
   rmq0:
@@ -50,3 +54,19 @@ services:
       # HOST:CONTAINER
       - 15674:15672
       - 15694:15692
+  haproxy:
+    image: haproxy:latest
+    networks:
+      rabbitnet:
+        aliases:
+          - haproxy.local
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - rmq0
+      - rmq1
+      - rmq2
+    ports:
+      # HOST:CONTAINER
+      - 8888:15672
+      - 5672:5672
