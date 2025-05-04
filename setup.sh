@@ -22,4 +22,11 @@ create_queues 4000 5999 &
 create_queues 6000 7999 &
 create_queues 8000 9999 &
 
+create_queues 10000 11999 &
+create_queues 12000 13999 &
+create_queues 14000 15999 &
+create_queues 16000 17999 &
+create_queues 18000 19999 &
+
+
 wait

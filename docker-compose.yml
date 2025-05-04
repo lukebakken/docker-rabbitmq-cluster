@@ -5,7 +5,7 @@ networks:
 
 x-rmq-common: &common-config
   build: rmq
-  mem_limit: 4gb
+  mem_limit: 8gb
   ulimits:
     nofile:
       soft: 65536
