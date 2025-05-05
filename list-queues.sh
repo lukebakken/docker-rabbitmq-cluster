@@ -22,7 +22,7 @@ function list_queues
     while :
     do
         info "listing queues on port '$port'..."
-        "$script_dir/bin/rabbitmqadmin" --port "$port" list queues --non-interactive > "$tmp/queues-$port.txt"
+        curl -sku 'guest:guest' "localhost:$port/api/queues?columns=name,type,state,vhost,auto_delete,consumers,exclusive,leader,members,message_bytes,messages,messages_persistent,messages_ready,messages_unacknowledged,node,online,slave_nodes,sync_messages,synchronised_slave_nodes" > "$tmp/queues-$port.txt"
         sleep 30
     done
 }
