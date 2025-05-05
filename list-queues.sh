@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+script_dir="$(CDPATH= cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly script_dir
+
 function now
 {
     date +%Y%m%dT-%H%M%S%z
@@ -19,7 +22,7 @@ function list_queues
     while :
     do
         info "listing queues on port '$port'..."
-        rabbitmqadmin --port "$port" list queues --non-interactive > "$tmp/queues-$port.txt"
+        "$script_dir/bin/rabbitmqadmin" --port "$port" list queues --non-interactive > "$tmp/queues-$port.txt"
         sleep 30
     done
 }
