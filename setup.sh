@@ -28,7 +28,7 @@ function create_queues
     local -i end=$2
     local -i port=15672
     info "START creating queues $start through $end"
-    for ((i = start; i < end; i++))
+    for ((i = start; i <= end; i++))
     do
         port="$((15672 + (i % 3)))"
         if ! "$script_dir/bin/rabbitmqadmin" --port "$port" declare queue --type quorum --name "qq-$i"
