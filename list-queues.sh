@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-script_dir="$(CDPATH= cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-readonly script_dir
+# script_dir="$(CDPATH= cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# readonly script_dir
 
 function now
 {
@@ -16,8 +16,8 @@ function info
 function list_queues
 {
     local -ri port=$1
-    local tmp="$(mktemp -d)"
-    readonly tmp
+    tmp="$(mktemp -d)"
+    local -r tmp
 
     while :
     do
@@ -28,10 +28,10 @@ function list_queues
 }
 
 list_queues 15672 &
-sleep "$(($RANDOM % 10))"
+sleep "$((RANDOM % 10))"
 
 list_queues 15673 &
-sleep "$(($RANDOM % 10))"
+sleep "$((RANDOM % 10))"
 
 list_queues 15674 &
 
