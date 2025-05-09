@@ -11,8 +11,6 @@ services:
       rabbitnet:
         aliases:
           - rmq0.local
-    environment:
-      - LOG=debug
     volumes:
       - ./data/rmq0:/var/lib/rabbitmq/mnesia
       - ./log/rmq0:/var/log/rabbitmq
@@ -26,8 +24,6 @@ services:
       rabbitnet:
         aliases:
           - rmq1.local
-    environment:
-      - LOG=debug
     volumes:
       - ./data/rmq1:/var/lib/rabbitmq/mnesia
       - ./log/rmq1:/var/log/rabbitmq
@@ -41,8 +37,6 @@ services:
       rabbitnet:
         aliases:
           - rmq2.local
-    environment:
-      - LOG=debug
     volumes:
       - ./data/rmq2:/var/lib/rabbitmq/mnesia
       - ./log/rmq2:/var/log/rabbitmq
