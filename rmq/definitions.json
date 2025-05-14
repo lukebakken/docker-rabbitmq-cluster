@@ -1,0 +1,910 @@
+{
+  "rabbit_version": "3.13.7+4.gdb7ccde",
+  "rabbitmq_version": "3.13.7+4.gdb7ccde",
+  "product_name": "RabbitMQ",
+  "product_version": "3.13.7+4.gdb7ccde",
+  "users": [
+    {
+      "name": "guest",
+      "password_hash": "D8S3saPne38TZG2N4OG3gDB32I5UTiRQH6+yv89uRGgHECxP",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ],
+      "limits": {}
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/",
+      "description": "Default virtual host",
+      "tags": [],
+      "metadata": {
+        "description": "Default virtual host",
+        "tags": []
+      }
+    }
+  ],
+  "permissions": [
+    {
+      "user": "guest",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "internal_cluster_id",
+      "value": "rabbitmq-cluster-id-uU1F0SzKP2JUI91uR97Glg"
+    }
+  ],
+  "policies": [
+    {
+      "vhost": "/",
+      "name": "ha-all",
+      "pattern": "^ha-queue",
+      "apply-to": "queues",
+      "definition": {
+        "ha-mode": "all",
+        "ha-promote-on-failure": "when-synced",
+        "ha-promote-on-shutdown": "when-synced",
+        "ha-sync-mode": "automatic"
+      },
+      "priority": 0
+    }
+  ],
+  "queues": [
+    {
+      "name": "ha-queue-0-61",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-32",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-60",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-45",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-36",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-15",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-56",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-30",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-2-5",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-67",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-51",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-65",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-1-3",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-63",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-23",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-2-3",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-38",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-0-9",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "qq-0-3",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "qq-2-1",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-57",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-42",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-6",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-54",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-31",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-33",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-13",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-34",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-52",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-3",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-59",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-47",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-17",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-29",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-58",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-39",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-2",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-11",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-50",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-10",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-0-8",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "qq-2-4",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-26",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-64",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-20",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-1-7",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "qq-0-2",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "qq-1-9",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "qq-2-2",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-14",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-1",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-35",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-0-4",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-5",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-0-5",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-22",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-66",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-27",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-40",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-12",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-46",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-1-1",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-21",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-8",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-19",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-0-1",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-0",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-28",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-0-6",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-62",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-18",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-48",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-55",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-16",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-24",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-1-4",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-49",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-25",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-1-6",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-7",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-1-0",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "qq-1-5",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "qq-0-7",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-53",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-41",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-2-0",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "qq-1-8",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-43",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-1-2",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-37",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-44",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "qq-0-0",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "ha-queue-0-9",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "ha-queue-0-4",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    }
+  ],
+  "exchanges": [],
+  "bindings": []
+}
