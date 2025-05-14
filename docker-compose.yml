@@ -24,6 +24,7 @@ services:
       - ./log/rmq0:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
+      - 8872:15672
       - 15692:15692
   rmq1:
     <<: *common-config
@@ -37,6 +38,7 @@ services:
       - ./log/rmq1:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
+      - 8873:15672
       - 15693:15692
   rmq2:
     <<: *common-config
@@ -50,8 +52,9 @@ services:
       - ./log/rmq2:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
+      - 8874:15672
       - 15694:15692
-  perf-test:
+  perf-test-classic:
     image: pivotalrabbitmq/perf-test:latest
     networks:
       - rabbitnet
@@ -70,6 +73,31 @@ services:
       - --queue-pattern=perf-test-%03d
       - --queue-pattern-from=0
       - --queue-pattern-to=2
+    depends_on:
+      - rmq0
+      - rmq1
+      - rmq2
+      - haproxy
+    restart: on-failure
+  perf-test-quorum:
+    image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
+    command:
+      - --uri=amqp://haproxy.local
+      - --servers-startup-timeout=45
+      - --rate=1
+      - --producers=3
+      - --consumers=3
+      - --confirm=32
+      - --confirm-timeout=800
+      - --flag=mandatory
+      - --flag=persistent
+      - --queue-args=x-queue-type=quorum
+      - --auto-delete=false
+      - --queue-pattern=perf-test-%03d
+      - --queue-pattern-from=3
+      - --queue-pattern-to=5
     depends_on:
       - rmq0
       - rmq1
