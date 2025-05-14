@@ -16,7 +16,7 @@ do
     then
         sleep 10
     fi
-    docker compose up --detach --no-deps "$svc"
+    docker compose up --remove-orphans --detach --no-deps "$svc"
 done
 
 echo "[INFO] DONE"

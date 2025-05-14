@@ -50,8 +50,6 @@
       "apply-to": "queues",
       "definition": {
         "ha-mode": "all",
-        "ha-promote-on-failure": "when-synced",
-        "ha-promote-on-shutdown": "when-synced",
         "ha-sync-mode": "automatic"
       },
       "priority": 0
