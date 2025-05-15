@@ -70,7 +70,7 @@ services:
       - --flag=persistent
       - --queue-args=x-queue-type=classic
       - --auto-delete=false
-      - --queue-pattern=perf-test-%03d
+      - --queue-pattern=ha-queue-pt-%03d
       - --queue-pattern-from=0
       - --queue-pattern-to=2
     depends_on:
