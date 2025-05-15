@@ -3,9 +3,17 @@ networks:
     name: rabbitnet
     driver: bridge
 
+x-rmq-common: &common-config
+  build: rmq
+  mem_limit: 8gb
+  ulimits:
+    nofile:
+      soft: 65536
+      hard: 131072
+
 services:
   rmq0:
-    build: rmq
+    <<: *common-config
     hostname: rmq0
     networks:
       rabbitnet:
@@ -16,9 +24,10 @@ services:
       - ./log/rmq0:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
+      - 8872:15672
       - 15692:15692
   rmq1:
-    build: rmq
+    <<: *common-config
     hostname: rmq1
     networks:
       rabbitnet:
@@ -29,9 +38,10 @@ services:
       - ./log/rmq1:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
+      - 8873:15673
       - 15693:15692
   rmq2:
-    build: rmq
+    <<: *common-config
     hostname: rmq2
     networks:
       rabbitnet:
@@ -42,6 +52,7 @@ services:
       - ./log/rmq2:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
+      - 8874:15674
       - 15694:15692
   perf-test:
     image: pivotalrabbitmq/perf-test:latest
