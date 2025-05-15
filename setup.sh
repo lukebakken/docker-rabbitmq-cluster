@@ -7,7 +7,7 @@ set -o pipefail
 declare -ri i_end="${1:-3}"
 declare -ri j_end="${2:-3}"
 
-rabbitmqadmin declare operator_policy name=ha-all pattern='^ha-queue' apply-to=queues 'definition={"ha-mode":"all","ha-sync-mode":"automatic"}'
+rabbitmqadmin declare operator_policy 'name=ha-all' 'pattern=^ha-queue' 'apply-to=queues' 'definition={"ha-mode":"all","ha-sync-mode":"automatic"}'
 
 for prefix in ha-queue non-ha-queue
 do
