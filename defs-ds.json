@@ -37,7 +37,7 @@
         "message-ttl": 259200000,
         "prefetch-count": 1000,
         "trust-user-id": true,
-        "uri": "amqp://rmq0-us.local:5672"
+        "uri": "amqp://rmq-us.local:5672"
       },
       "vhost": "/",
       "component": "federation-upstream",

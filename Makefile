@@ -1,21 +1,32 @@
-.PHONY: clean down fresh image-base import up
+.PHONY: clean down up perms rmq-perms enable-ff import
 
-clean: down
-	docker system prune --force
+DOCKER_FRESH ?= false
+RABBITMQ_DOCKER_TAG ?= rabbitmq:3.13.7-management
+
+clean: perms
+	git clean -xffd
 
 down:
 	docker compose down
 
-fresh: down clean up import
+up: rmq-perms
+ifeq ($(DOCKER_FRESH),true)
+	docker compose build --no-cache --pull --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
+	docker compose up --pull always
+else
+	docker compose build --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
+	docker compose up
+endif
 
-image-base:
-	docker build --pull --tag rabbitmq-base:latest --file $(CURDIR)/docker/base .
+perms:
+	sudo chown -R "$$(id -u):$$(id -g)" data log
 
-image-vesc-1034:
-	docker build --tag vesc-1034:latest --file $(CURDIR)/docker/vesc-1034 .
+rmq-perms:
+	sudo chown -R '999:999' data log
+
+enable-ff:
+	docker compose exec rmq-us rabbitmqctl enable_feature_flag all
+	docker compose exec rmq-ds rabbitmqctl enable_feature_flag all
 
 import:
 	/bin/sh $(CURDIR)/import-defs.sh
-
-up:
-	docker compose up --detach

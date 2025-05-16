@@ -1,34 +1,42 @@
-version: '3'
-
 networks:
   rabbitnet:
     name: rabbitnet
     driver: bridge
 
+x-rmq-common: &common-config
+  build: rmq
+  mem_limit: 8gb
+  ulimits:
+    nofile:
+      soft: 65536
+      hard: 131072
+
 services:
-  rmq0-ds:
-    image: vesc-1034:latest
-    hostname: rmq0-ds
+  rmq-ds:
+    <<: *common-config
+    hostname: rmq-ds
     networks:
       rabbitnet:
         aliases:
-          - rmq0-ds.local
+          - rmq-ds.local
     environment:
       - LOG=debug
     volumes:
-      - ./rabbitmq-ds.conf:/etc/rabbitmq/conf.d/99-rabbitmq-ds.conf
+      - ./data/rmq-ds:/var/lib/rabbitmq/mnesia
+      - ./log/rmq-ds:/var/log/rabbitmq
       - ./defs-ds.json:/var/lib/rabbitmq/definitions.json
-  rmq0-us:
-    image: vesc-1034:latest
-    hostname: rmq0-us
+  rmq-us:
+    <<: *common-config
+    hostname: rmq-us
     networks:
       rabbitnet:
         aliases:
-          - rmq0-us.local
+          - rmq-us.local
     environment:
       - LOG=debug
     volumes:
-      - ./rabbitmq-us.conf:/etc/rabbitmq/conf.d/99-rabbitmq-us.conf
+      - ./data/rmq-us:/var/lib/rabbitmq/mnesia
+      - ./log/rmq-us:/var/log/rabbitmq
       - ./defs-us.json:/var/lib/rabbitmq/definitions.json
   perf-test-us-0:
     image: pivotalrabbitmq/perf-test:latest
@@ -199,7 +207,7 @@ services:
     volumes:
       - ./haproxy-ds.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
-      - rmq0-ds
+      - rmq-ds
     ports:
       # HOST:CONTAINER
       - 15672:15672
@@ -213,7 +221,7 @@ services:
     volumes:
       - ./haproxy-us.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
-      - rmq0-us
+      - rmq-us
     ports:
       # HOST:CONTAINER
       - 15682:15672
