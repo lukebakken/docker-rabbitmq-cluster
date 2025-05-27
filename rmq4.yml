@@ -1,0 +1,26 @@
+networks:
+  rabbitnet:
+    name: rabbitnet
+    driver: bridge
+
+x-rmq-common: &common-config
+  networks:
+    - rabbitnet
+  build: rmq
+  mem_limit: 8gb
+  ulimits:
+    nofile:
+      soft: 65536
+      hard: 131072
+
+services:
+  rmq4:
+    <<: *common-config
+    hostname: rmq4
+    volumes:
+      - ./data/rmq4:/var/lib/rabbitmq/mnesia
+      - ./log/rmq4:/var/log/rabbitmq
+    ports:
+      # HOST:CONTAINER
+      - 8876:15672
+      - 15696:15692

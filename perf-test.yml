@@ -1,0 +1,26 @@
+﻿networks:
+  rabbitnet:
+    name: rabbitnet
+    driver: bridge
+
+services:
+  perf-test:
+    image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
+    command:
+      - --uris=amqp://rmq0,amqp://rmq1,amqp://rmq2
+      - --servers-startup-timeout=45
+      - --pmessages=1000000
+      - --size=1024
+      - --producers=3
+      - --consumers=0
+      - --confirm=256
+      - --confirm-timeout=10
+      - --flag=mandatory
+      - --flag=persistent
+      - --auto-delete=false
+      - --queue-pattern=perf-test-%03d
+      - --queue-pattern-from=0
+      - --queue-pattern-to=5
+    restart: on-failure
