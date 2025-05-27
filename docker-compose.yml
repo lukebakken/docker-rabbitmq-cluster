@@ -38,7 +38,7 @@ services:
       - ./log/rmq1:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
-      - 8873:15673
+      - 8873:15672
       - 15693:15692
   rmq2:
     <<: *common-config
@@ -52,7 +52,7 @@ services:
       - ./log/rmq2:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
-      - 8874:15674
+      - 8874:15672
       - 15694:15692
   perf-test:
     image: pivotalrabbitmq/perf-test:latest
