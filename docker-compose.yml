@@ -4,6 +4,8 @@ networks:
     driver: bridge
 
 x-rmq-common: &common-config
+  networks:
+    - rabbitnet
   build: rmq
   mem_limit: 8gb
   ulimits:
@@ -15,10 +17,6 @@ services:
   rmq0:
     <<: *common-config
     hostname: rmq0
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq0.local
     volumes:
       - ./data/rmq0:/var/lib/rabbitmq/mnesia
       - ./log/rmq0:/var/log/rabbitmq
@@ -29,10 +27,6 @@ services:
   rmq1:
     <<: *common-config
     hostname: rmq1
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq1.local
     volumes:
       - ./data/rmq1:/var/lib/rabbitmq/mnesia
       - ./log/rmq1:/var/log/rabbitmq
@@ -43,10 +37,6 @@ services:
   rmq2:
     <<: *common-config
     hostname: rmq2
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq2.local
     volumes:
       - ./data/rmq2:/var/lib/rabbitmq/mnesia
       - ./log/rmq2:/var/log/rabbitmq
@@ -59,7 +49,7 @@ services:
     networks:
       - rabbitnet
     command:
-      - --uri=amqp://haproxy.local
+      - --uri=amqp://haproxy
       - --servers-startup-timeout=45
       - --rate=100
       - --producers=5
@@ -84,7 +74,7 @@ services:
     networks:
       - rabbitnet
     command:
-      - --uris rabbitmq-stream://rmq0.local:5552,rabbitmq-stream://rmq1.local:5552,rabbitmq-stream:rmq2.local:5552
+      - --uris rabbitmq-stream://rmq0:5552,rabbitmq-stream://rmq1:5552,rabbitmq-stream:rmq2:5552
       - --producers 1
       - --consumers 1
       - --rate 100
@@ -100,7 +90,7 @@ services:
     networks:
       rabbitnet:
         aliases:
-          - haproxy.local
+          - haproxy
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
