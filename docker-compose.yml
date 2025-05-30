@@ -44,47 +44,6 @@ services:
       # HOST:CONTAINER
       - 8874:15672
       - 15694:15692
-  perf-test:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy
-      - --servers-startup-timeout=45
-      - --rate=100
-      - --producers=5
-      - --consumers=5
-      - --confirm=32
-      - --confirm-timeout=800
-      - --flag=mandatory
-      - --flag=persistent
-      - --queue-args=x-queue-type=quorum
-      - --auto-delete=false
-      - --queue-pattern=perf-test-%03d
-      - --queue-pattern-from=0
-      - --queue-pattern-to=4
-    depends_on:
-      - rmq0
-      - rmq1
-      - rmq2
-      - haproxy
-    restart: on-failure
-  stream-perf-test:
-    image: pivotalrabbitmq/stream-perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uris rabbitmq-stream://rmq0:5552,rabbitmq-stream://rmq1:5552,rabbitmq-stream:rmq2:5552
-      - --producers 1
-      - --consumers 1
-      - --rate 100
-      - --delete-streams
-      - --max-age PT30S
-    depends_on:
-      - rmq0
-      - rmq1
-      - rmq2
-    restart: on-failure
   haproxy:
     image: haproxy:latest
     networks:

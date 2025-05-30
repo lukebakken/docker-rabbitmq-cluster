@@ -1,0 +1,36 @@
+﻿networks:
+  rabbitnet:
+    name: rabbitnet
+    driver: bridge
+
+x-common: &common-config
+  networks:
+    - rabbitnet
+  mem_limit: 8gb
+  ulimits:
+    nofile:
+      soft: 65536
+      hard: 131072
+
+services:
+  perf-test:
+    <<: *common-config
+    image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
+    command:
+      - --uris=amqp://rmq0,amqp://rmq1,amqp://rmq2
+      - --servers-startup-timeout=45
+      - --rate=10
+      - --producers=5
+      - --consumers=5
+      - --confirm=32
+      - --confirm-timeout=10
+      - --flag=mandatory
+      - --flag=persistent
+      - --queue-args=x-queue-type=quorum
+      - --auto-delete=false
+      - --queue-pattern=perf-test-%03d
+      - --queue-pattern-from=0
+      - --queue-pattern-to=4
+    restart: on-failure
