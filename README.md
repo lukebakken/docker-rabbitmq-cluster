@@ -4,8 +4,10 @@
 make up
 ```
 
-## Clean data:
+## Attempt to reproduce issue
 
 ```
-make clean
+./repro.sh
 ```
+
+Note that the correct queue type is listed.
