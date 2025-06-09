@@ -22,7 +22,8 @@ services:
       - ./log/rmq0:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
-      - 8872:15672
+      - 5672:5672
+      - 15672:15672
       - 15692:15692
   rmq1:
     <<: *common-config
@@ -32,7 +33,8 @@ services:
       - ./log/rmq1:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
-      - 8873:15672
+      - 5673:5672
+      - 15673:15672
       - 15693:15692
   rmq2:
     <<: *common-config
@@ -42,19 +44,20 @@ services:
       - ./log/rmq2:/var/log/rabbitmq
     ports:
       # HOST:CONTAINER
-      - 8874:15672
+      - 5674:5672
+      - 15674:15672
       - 15694:15692
-  haproxy:
-    image: haproxy:latest
-    networks:
-      - rabbitnet
-    volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    depends_on:
-      - rmq0
-      - rmq1
-      - rmq2
-    ports:
-      # HOST:CONTAINER
-      - 15672:15672
-      - 5672:5672
+#   haproxy:
+#     image: haproxy:latest
+#     networks:
+#       - rabbitnet
+#     volumes:
+#       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+#     depends_on:
+#       - rmq0
+#       - rmq1
+#       - rmq2
+#     ports:
+#       # HOST:CONTAINER
+#       - 15672:15672
+#       - 5672:5672
