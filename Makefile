@@ -12,10 +12,10 @@ down:
 up: rmq-perms
 ifeq ($(DOCKER_FRESH),true)
 	docker compose build --no-cache --pull --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
-	docker compose up --pull always
+	docker compose up --pull always --remove-orphans
 else
 	docker compose build --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
-	docker compose up
+	docker compose up --remove-orphans
 endif
 
 perms:
