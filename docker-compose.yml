@@ -1,44 +1,42 @@
-version: '3'
-
 networks:
   rabbitnet:
     name: rabbitnet
     driver: bridge
 
+x-rmq-common: &common-config
+  networks:
+    - rabbitnet
+  build: rmq
+  mem_limit: 8gb
+  ulimits:
+    nofile:
+      soft: 65536
+      hard: 131072
+
 services:
   rmq0:
-    image: rabbitmq-local:latest
+    <<: *common-config
     hostname: rmq0
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq0.local
-    environment:
-      - LOG=debug
     volumes:
       - ./data/rmq0:/var/lib/rabbitmq/mnesia
       - ./log/rmq0:/var/log/rabbitmq
+    ports:
+      # HOST:CONTAINER
+      - 8872:15672
+      - 15692:15692
   rmq1:
-    image: rabbitmq-local:latest
+    <<: *common-config
     hostname: rmq1
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq1.local
-    environment:
-      - LOG=debug
     volumes:
       - ./data/rmq1:/var/lib/rabbitmq/mnesia
       - ./log/rmq1:/var/log/rabbitmq
+    ports:
+      # HOST:CONTAINER
+      - 8873:15672
+      - 15693:15692
   rmq2:
-    image: rabbitmq-local:latest
+    <<: *common-config
     hostname: rmq2
-    networks:
-      rabbitnet:
-        aliases:
-          - rmq2.local
-    environment:
-      - LOG=debug
     volumes:
       - ./data/rmq2:/var/lib/rabbitmq/mnesia
       - ./log/rmq2:/var/log/rabbitmq
@@ -47,23 +45,29 @@ services:
     networks:
       - rabbitnet
     command:
-      - --uri=amqp://haproxy.local
-      - --servers-startup-timeout=30
+      - --uri=amqp://haproxy
+      - --servers-startup-timeout=45
       - --rate=100
-      - --producers=6
-      - --consumers=6
-      - --flag=persistent
+      - --producers=5
+      - --consumers=5
+      - --confirm=32
+      - --confirm-timeout=800
       - --flag=mandatory
-      - --confirm=4
+      - --flag=persistent
+      - --auto-delete=false
+      - --queue-pattern=perf-test-%03d
+      - --queue-pattern-from=0
+      - --queue-pattern-to=4
     depends_on:
-      - haproxy-us
+      - rmq0
+      - rmq1
+      - rmq2
+      - haproxy
     restart: on-failure
   haproxy:
     image: haproxy:latest
     networks:
-      rabbitnet:
-        aliases:
-          - haproxy.local
+      - rabbitnet
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
