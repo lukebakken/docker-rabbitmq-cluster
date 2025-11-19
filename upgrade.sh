@@ -11,10 +11,8 @@ echo "[INFO] upgrading cluster!"
 
 for SVC in rmq0 rmq1 rmq2
 do
-    # NB: https://github.com/docker/compose/issues/1262
-    container_id="$(docker compose ps -q "$SVC")"
     set +o errexit
-    docker exec "$container_id" /opt/rabbitmq/sbin/rabbitmq-upgrade drain
+    docker compose exec "$SVC" /opt/rabbitmq/sbin/rabbitmq-upgrade drain
     set -o errexit
     docker compose stop "$SVC"
     sleep 5

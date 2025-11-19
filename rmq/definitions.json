@@ -1,0 +1,78 @@
+{
+  "rabbit_version": "4.1.6",
+  "rabbitmq_version": "4.1.6",
+  "product_name": "RabbitMQ",
+  "product_version": "4.1.6",
+  "rabbitmq_definition_format": "cluster",
+  "original_cluster_name": "rabbitmq-server-14973",
+  "explanation": "Definitions of cluster rabbitmq-server-14973",
+  "users": [
+    {
+      "name": "guest",
+      "password_hash": "thhBHSq9mOCiUoAwAMMYIYE6miKxD9wjxWMcPNM9SXOIUJA1",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ],
+      "limits": {}
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/",
+      "description": "Default virtual host",
+      "metadata": {
+        "description": "Default virtual host",
+        "tags": [],
+        "default_queue_type": "quorum"
+      },
+      "tags": []
+    }
+  ],
+  "permissions": [
+    {
+      "user": "guest",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "cluster_tags",
+      "value": []
+    },
+    {
+      "name": "internal_cluster_id",
+      "value": "rabbitmq-server-14973"
+    }
+  ],
+  "policies": [],
+  "queues": [],
+  "exchanges": [
+    {
+      "name": "rabbitmq-server-14973",
+      "vhost": "/",
+      "type": "x-delayed-message",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {
+        "x-delayed-type": "direct"
+      }
+    },
+    {
+      "name": "direct",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": []
+}
