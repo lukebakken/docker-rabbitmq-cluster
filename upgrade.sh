@@ -21,5 +21,13 @@ do
     docker compose exec "$SVC" rabbitmqctl await_startup
 done
 
-docker compose exec rmq0 rabbitmqctl await_startup
 docker compose exec rmq0 rabbitmqctl enable_feature_flag all
+sleep 5
+
+for SVC in rmq0 rmq1 rmq2
+do
+    docker compose exec "$SVC" rabbitmqctl await_startup
+    docker compose exec "$SVC" rabbitmq-plugins disable rabbitmq_delayed_message_exchange
+    sleep 5
+    docker compose exec "$SVC" rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+done
