@@ -19,6 +19,9 @@ do
     docker compose stop "$SVC"
     sleep 5
     docker compose up --detach "$SVC"
+    sleep 5
+    docker compose exec "$SVC" rabbitmqctl await_startup
 done
 
+docker compose exec rmq0 rabbitmqctl await_startup
 docker compose exec rmq0 rabbitmqctl enable_feature_flag all
