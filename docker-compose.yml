@@ -6,7 +6,6 @@ networks:
 x-rmq-common: &common-config
   networks:
     - rabbitnet
-  build: rmq
   mem_limit: 8gb
   ulimits:
     nofile:
@@ -17,6 +16,7 @@ services:
   rmq0:
     <<: *common-config
     hostname: rmq0
+    build: rmq0
     volumes:
       - ./data/rmq0:/var/lib/rabbitmq/mnesia
       - ./log/rmq0:/var/log/rabbitmq
@@ -27,6 +27,7 @@ services:
   rmq1:
     <<: *common-config
     hostname: rmq1
+    build: rmq1
     volumes:
       - ./data/rmq1:/var/lib/rabbitmq/mnesia
       - ./log/rmq1:/var/log/rabbitmq
@@ -37,6 +38,7 @@ services:
   rmq2:
     <<: *common-config
     hostname: rmq2
+    build: rmq2
     volumes:
       - ./data/rmq2:/var/lib/rabbitmq/mnesia
       - ./log/rmq2:/var/log/rabbitmq
@@ -75,7 +77,6 @@ services:
       - rabbitnet
     command:
       - --uris rabbitmq-stream://haproxy:5552
-      - --load-balancer
       - --producers 5
       - --consumers 5
       - --rate 1000
