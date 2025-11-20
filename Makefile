@@ -1,4 +1,4 @@
-.PHONY: clean down up perms rmq-perms enable-ff
+.PHONY: clean down up perms rmq-perms enable-ff run-stream-perf-test
 
 DOCKER_FRESH ?= false
 RABBITMQ_DOCKER_TAG ?= rabbitmq:4-management
@@ -26,3 +26,6 @@ rmq-perms:
 
 enable-ff:
 	docker compose exec rmq0 rabbitmqctl enable_feature_flag all
+
+run-stream-perf-test:
+	docker run --rm --pull always --network rabbitnet pivotalrabbitmq/stream-perf-test:latest --uris rabbitmq-stream://haproxy:5552 --producers 5 --consumers 5 --rate 1000 --delete-streams --max-age PT30S --load-balancer
