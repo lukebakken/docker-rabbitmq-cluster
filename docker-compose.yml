@@ -74,23 +74,23 @@ services:
     networks:
       - rabbitnet
     command:
-      - --uris rabbitmq-stream://rmq0:5552,rabbitmq-stream://rmq1:5552,rabbitmq-stream:rmq2:5552
-      - --producers 1
-      - --consumers 1
-      - --rate 100
+      - --uris rabbitmq-stream://haproxy:5552
+      - --load-balancer
+      - --producers 5
+      - --consumers 5
+      - --rate 1000
       - --delete-streams
       - --max-age PT30S
     depends_on:
       - rmq0
       - rmq1
       - rmq2
+      - haproxy
     restart: on-failure
   haproxy:
     image: haproxy:latest
     networks:
-      rabbitnet:
-        aliases:
-          - haproxy
+      - rabbitnet
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
@@ -101,3 +101,4 @@ services:
       # HOST:CONTAINER
       - 15672:15672
       - 5672:5672
+      - 5552:5552
