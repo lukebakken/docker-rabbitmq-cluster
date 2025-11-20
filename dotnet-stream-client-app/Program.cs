@@ -50,6 +50,7 @@ public class StreamClient
                 options.TimestampFormat = "[HH:mm:ss] ";
                 options.ColorBehavior = LoggerColorBehavior.Default;
             })
+            .AddFilter("RabbitMQ.Stream.Client.StreamSystem", LogLevel.Critical)
             .AddFilter(level => level >= LogLevel.Information)
         );
 
@@ -113,7 +114,39 @@ public class StreamClient
                 };
             }
 
-            var system = await StreamSystem.Create(streamConf, ls);
+            StreamSystem? system = null;
+            var retryCount = 0;
+            var maxRetries = 10;
+            var retryDelay = TimeSpan.FromSeconds(5);
+
+            while (system == null && !cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    await Console.Out.WriteLineAsync($"Attempting to connect to RabbitMQ (attempt {retryCount + 1}/{maxRetries})...");
+                    system = await StreamSystem.Create(streamConf, ls);
+                    await Console.Out.WriteLineAsync("Successfully connected to RabbitMQ");
+                }
+                catch (StreamSystemInitialisationException ex)
+                {
+                    retryCount++;
+                    if (retryCount >= maxRetries)
+                    {
+                        await Console.Out.WriteLineAsync($"Failed to connect after {maxRetries} attempts. Exiting.");
+                        throw;
+                    }
+
+                    await Console.Out.WriteLineAsync($"Connection failed: {ex.Message}. Retrying in {retryDelay.TotalSeconds} seconds...");
+                    await Task.Delay(retryDelay, cancellationToken);
+                }
+            }
+
+            if (system == null)
+            {
+                await Console.Out.WriteLineAsync("Failed to connect to RabbitMQ. Exiting.");
+                return;
+            }
+
             var streamsList = new List<string>();
             if (config.SuperStream)
             {
@@ -152,6 +185,7 @@ public class StreamClient
 
             List<Consumer> consumersList = new();
             ConcurrentBag<Producer> producersBag = new();
+            List<Task> producerTasks = new();
 
             if (config.SuperStream)
             {
@@ -223,9 +257,9 @@ public class StreamClient
                         await Consumer.Create(conf, lc));
                 }
 
-                async Task MaybeSend(Producer producer, Message message, ManualResetEvent publishEvent)
+                async Task MaybeSend(Producer producer, Message message, ManualResetEventSlim publishEvent)
                 {
-                    publishEvent.WaitOne();
+                    publishEvent.Wait();
                     await producer.Send(message);
                 }
 
@@ -234,7 +268,7 @@ public class StreamClient
                 for (var z = 0; z < config.Producers; z++)
                 {
                     var z1 = z;
-                    _ = Task.Run(async () =>
+                    var producerTask = Task.Run(async () =>
                     {
                         // the list of unconfirmed messages in case of error or disconnection
                         // This example is only for the example, in a real scenario you should handle the unconfirmed messages
@@ -242,7 +276,7 @@ public class StreamClient
                         var unconfirmedMessages = new ConcurrentBag<Message>();
                         // the event to wait for the producer to be ready to send
                         // in case of disconnection the event will be reset
-                        var publishEvent = new ManualResetEvent(false);
+                        var publishEvent = new ManualResetEventSlim(false);
                         var producerConfig = new ProducerConfig(system, stream)
                         {
                             Identifier = $"my_producer_{z1}",
@@ -337,56 +371,63 @@ public class StreamClient
                             Interlocked.Increment(ref totalSent);
                         }
                     });
+                    producerTasks.Add(producerTask);
                 }
             }
 
             try
             {
-                await Task.Delay(Timeout.Infinite, cancellationToken);
+                await Task.WhenAll(producerTasks.Append(Task.Delay(Timeout.Infinite, cancellationToken)));
             }
             catch (OperationCanceledException)
-        {
-            Console.WriteLine("Shutdown requested, stopping producers and consumers...");
-            await Console.Out.FlushAsync();
-            isRunning = false;
-
-            Console.WriteLine("Waiting for in-flight messages...");
-            await Console.Out.FlushAsync();
-            var timeout = TimeSpan.FromSeconds(10);
-            var start = DateTime.UtcNow;
-            while ((totalConfirmed + totalError) < totalSent && DateTime.UtcNow - start < timeout)
             {
-                await Task.Delay(100);
-            }
-            Console.WriteLine($"Messages: Sent={totalSent}, Confirmed={totalConfirmed}, Error={totalError}");
-            await Console.Out.FlushAsync();
+                await Console.Out.WriteLineAsync("Shutdown requested, stopping producers and consumers...");
+                await Console.Out.FlushAsync();
+                isRunning = false;
 
-            Console.WriteLine("Closing producers...");
-            await Console.Out.FlushAsync();
-            foreach (var producer in producersBag)
-            {
-                await producer.Close();
-            }
+                await Console.Out.WriteLineAsync("Waiting for in-flight messages...");
+                await Console.Out.FlushAsync();
+                var timeout = TimeSpan.FromSeconds(10);
+                var start = DateTime.UtcNow;
+                while ((totalConfirmed + totalError) < totalSent && DateTime.UtcNow - start < timeout)
+                {
+                    await Task.Delay(100);
+                }
+                await Console.Out.WriteLineAsync($"Messages: Sent={totalSent}, Confirmed={totalConfirmed}, Error={totalError}");
+                await Console.Out.FlushAsync();
 
-            Console.WriteLine("Closing consumers...");
-            await Console.Out.FlushAsync();
-            foreach (var consumer in consumersList)
-            {
-                await consumer.Close();
-            }
+                await Console.Out.WriteLineAsync("Closing producers...");
+                await Console.Out.FlushAsync();
+                foreach (var producer in producersBag)
+                {
+                    await producer.Close();
+                }
 
-            Console.WriteLine("Closing stream system...");
-            await Console.Out.FlushAsync();
-            await system.Close();
+                await Console.Out.WriteLineAsync("Closing consumers...");
+                await Console.Out.FlushAsync();
+                foreach (var consumer in consumersList)
+                {
+                    await consumer.Close();
+                }
 
-            Console.WriteLine("Cleanup complete");
-            await Console.Out.FlushAsync();
+                await Console.Out.WriteLineAsync("Closing stream system...");
+                await Console.Out.FlushAsync();
+                if (system != null)
+                {
+                    await system.Close();
+                }
+
+                await Console.Out.WriteLineAsync("Cleanup complete");
+                await Console.Out.FlushAsync();
             }
         }
     }
 
     public static async Task Main(string[] args)
     {
+        Console.WriteLine("Application starting, registering signal handlers...");
+        await Console.Out.FlushAsync();
+
         var config = new Config
         {
             Host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost",
@@ -396,19 +437,33 @@ public class StreamClient
         };
 
         var cts = new CancellationTokenSource();
+        var shutdownComplete = new ManualResetEventSlim(false);
+
+        AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
+        {
+            Console.WriteLine("ProcessExit event received, initiating shutdown...");
+            Console.Out.Flush();
+            cts.Cancel();
+            shutdownComplete.Wait(TimeSpan.FromSeconds(25));
+        };
 
         PosixSignalRegistration.Create(PosixSignal.SIGTERM, context =>
         {
+            Console.WriteLine("SIGTERM signal received, initiating shutdown...");
+            Console.Out.Flush();
             context.Cancel = true;
             cts.Cancel();
         });
 
         PosixSignalRegistration.Create(PosixSignal.SIGINT, context =>
         {
+            Console.WriteLine("SIGINT signal received, initiating shutdown...");
+            Console.Out.Flush();
             context.Cancel = true;
             cts.Cancel();
         });
 
         await Start(config, cts.Token);
+        shutdownComplete.Set();
     }
 }
