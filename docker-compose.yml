@@ -46,24 +46,6 @@ services:
       # HOST:CONTAINER
       - 8874:15672
       - 15694:15692
-  stream-perf-test:
-    image: pivotalrabbitmq/stream-perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uris rabbitmq-stream://haproxy:5552
-      - --producers 5
-      - --consumers 5
-      - --rate 1000
-      - --delete-streams
-      - --max-age PT30S
-      - --load-balancer
-    depends_on:
-      - rmq0
-      - rmq1
-      - rmq2
-      - haproxy
-    restart: on-failure
   dotnet-stream-client-app:
     build: dotnet-stream-client-app
     networks:
@@ -71,6 +53,20 @@ services:
     environment:                                 
       - RABBITMQ_HOST=haproxy
       - RABBITMQ_PORT=5552                       
+    depends_on:
+      - rmq0
+      - rmq1
+      - rmq2
+      - haproxy
+    restart: on-failure
+    stop_grace_period: 30s
+  java-stream-client-app:
+    build: java-stream-client-app
+    networks:
+      - rabbitnet
+    environment:
+      - RABBITMQ_HOST=haproxy
+      - RABBITMQ_PORT=5552
     depends_on:
       - rmq0
       - rmq1

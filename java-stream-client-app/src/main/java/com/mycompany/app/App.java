@@ -12,17 +12,37 @@ public class App {
     public static void main(String[] args) throws Exception {
         String user = "guest";
         String password = "guest";
-        String host = "localhost";
+        String host = System.getenv().getOrDefault("RABBITMQ_HOST", "localhost");
+        int port = Integer.parseInt(System.getenv().getOrDefault("RABBITMQ_PORT", "5552"));
 
-        Address entryPoint = new Address(host, 5552);
+        Address entryPoint = new Address(host, port);
 
-        Environment environment = Environment.builder()
-                .addressResolver(address -> entryPoint) // Use a load balancer
-                .host(host)
-                .port(5552)
-                .username(user)
-                .password(password)
-                .build();
+        Environment environment = null;
+        int retryCount = 0;
+        int maxRetries = 10;
+        int retryDelaySeconds = 5;
+
+        while (environment == null && retryCount < maxRetries) {
+            try {
+                System.out.println("Attempting to connect to RabbitMQ (attempt " + (retryCount + 1) + "/" + maxRetries + ")...");
+                environment = Environment.builder()
+                        .addressResolver(address -> entryPoint) // Use a load balancer
+                        .host(host)
+                        .port(port)
+                        .username(user)
+                        .password(password)
+                        .build();
+                System.out.println("Successfully connected to RabbitMQ");
+            } catch (Exception ex) {
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    System.out.println("Failed to connect after " + maxRetries + " attempts. Exiting.");
+                    throw ex;
+                }
+                System.out.println("Connection failed: " + ex.getMessage() + ". Retrying in " + retryDelaySeconds + " seconds...");
+                Thread.sleep(retryDelaySeconds * 1000);
+            }
+        }
 
         // Create the "mystream" stream
         environment.streamCreator().stream("mystream").create();
