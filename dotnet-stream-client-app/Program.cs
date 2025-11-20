@@ -24,17 +24,17 @@ public class StreamClient
         public string? Username { get; set; } = "guest";
         public string? Password { get; set; } = "guest";
 
-        public string? StreamName { get; set; } = "DotNetClientTest";
+        public string? StreamName { get; set; } = "dotnet-stream-client-app";
         public bool LoadBalancer { get; set; } = true;
         public bool SuperStream { get; set; } = false;
         public int Streams { get; set; } = 1;
-        public int Producers { get; set; } = 9;
-        public byte ProducersPerConnection { get; set; } = 7;
+        public int Producers { get; set; } = 2;
+        public byte ProducersPerConnection { get; set; } = 1;
         public int MessagesPerProducer { get; set; } = 5_000_000;
-        public int Consumers { get; set; } = 9;
-        public byte ConsumersPerConnection { get; set; } = 8;
+        public int Consumers { get; set; } = 5;
+        public byte ConsumersPerConnection { get; set; } = 1;
 
-        public int DelayDuringSendMs { get; set; } = 0;
+        public int DelayDuringSendMs { get; set; } = 100;
 
         public bool EnableResending { get; set; } = false;
     }
@@ -89,6 +89,7 @@ public class StreamClient
                 UserName = config.Username,
                 Password = config.Password,
                 Endpoints = new List<EndPoint>() { ep },
+                ClientProvidedName = "dotnet-stream-client-app",
                 ConnectionPoolConfig = new ConnectionPoolConfig()
                 {
                     ProducersPerConnection = config.ProducersPerConnection,
@@ -105,6 +106,7 @@ public class StreamClient
                     AddressResolver = resolver,
                     UserName = config.Username,
                     Password = config.Password,
+                    ClientProvidedName = "dotnet-stream-client-app",
                     ConnectionPoolConfig = new ConnectionPoolConfig()
                     {
                         ProducersPerConnection = config.ProducersPerConnection,
