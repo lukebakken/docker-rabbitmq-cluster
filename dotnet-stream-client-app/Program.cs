@@ -4,6 +4,7 @@
 
 using System.Collections.Concurrent;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -346,9 +347,11 @@ public class StreamClient
             catch (OperationCanceledException)
         {
             Console.WriteLine("Shutdown requested, stopping producers and consumers...");
+            await Console.Out.FlushAsync();
             isRunning = false;
 
             Console.WriteLine("Waiting for in-flight messages...");
+            await Console.Out.FlushAsync();
             var timeout = TimeSpan.FromSeconds(10);
             var start = DateTime.UtcNow;
             while ((totalConfirmed + totalError) < totalSent && DateTime.UtcNow - start < timeout)
@@ -356,23 +359,28 @@ public class StreamClient
                 await Task.Delay(100);
             }
             Console.WriteLine($"Messages: Sent={totalSent}, Confirmed={totalConfirmed}, Error={totalError}");
+            await Console.Out.FlushAsync();
 
             Console.WriteLine("Closing producers...");
+            await Console.Out.FlushAsync();
             foreach (var producer in producersBag)
             {
                 await producer.Close();
             }
 
             Console.WriteLine("Closing consumers...");
+            await Console.Out.FlushAsync();
             foreach (var consumer in consumersList)
             {
                 await consumer.Close();
             }
 
             Console.WriteLine("Closing stream system...");
+            await Console.Out.FlushAsync();
             await system.Close();
 
             Console.WriteLine("Cleanup complete");
+            await Console.Out.FlushAsync();
             }
         }
     }
@@ -388,11 +396,18 @@ public class StreamClient
         };
 
         var cts = new CancellationTokenSource();
-        Console.CancelKeyPress += (sender, e) =>
+
+        PosixSignalRegistration.Create(PosixSignal.SIGTERM, context =>
         {
-            e.Cancel = true;
+            context.Cancel = true;
             cts.Cancel();
-        };
+        });
+
+        PosixSignalRegistration.Create(PosixSignal.SIGINT, context =>
+        {
+            context.Cancel = true;
+            cts.Cancel();
+        });
 
         await Start(config, cts.Token);
     }
