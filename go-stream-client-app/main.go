@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -62,7 +63,10 @@ func main() {
 	fmt.Println("Go Stream Client Application")
 	fmt.Printf("Connecting to %s:%d\n", config.Host, config.Port)
 
-	// Setup signal handling
+	// Setup signal handling with context
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
@@ -161,10 +165,23 @@ func main() {
 			}()
 
 			for j := 0; j < config.MessagesPerProducer; j++ {
+				// Check if context is cancelled (Ctrl+C pressed)
+				select {
+				case <-ctx.Done():
+					return
+				default:
+				}
+
 				message := fmt.Sprintf("producer-%d-message-%d", producerID, j)
 				err := producer.Send(amqp.NewMessage([]byte(message)))
 				if err != nil {
-					fmt.Printf("Producer %d failed to send message %d: %s\n", producerID, j, err)
+					// Only log error if not shutting down
+					select {
+					case <-ctx.Done():
+						return
+					default:
+						fmt.Printf("Producer %d failed to send message %d: %s\n", producerID, j, err)
+					}
 					continue
 				}
 				totalSent.Add(1)
@@ -216,6 +233,7 @@ func main() {
 	}()
 
 	<-sigChan
+	cancel() // Cancel context to stop producers gracefully
 	fmt.Println("Shutdown signal received, stopping...")
 
 	fmt.Printf("\nProduction complete:\n")
@@ -239,9 +257,12 @@ func main() {
 	consumersMutex.Unlock()
 
 	consumerWg.Wait()
-	stopStats <- true
 
 	duration := time.Since(startTime)
+
+	// Stop statistics reporting before final output
+	stopStats <- true
+
 	fmt.Printf("\nAll operations complete:\n")
 	fmt.Printf("  Total duration: %v\n", duration)
 	fmt.Printf("  Messages received: %d\n", totalReceived.Load())
