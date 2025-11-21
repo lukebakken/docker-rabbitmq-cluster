@@ -46,34 +46,34 @@ services:
       # HOST:CONTAINER
       - 8874:15672
       - 15694:15692
-  dotnet-stream-client-app:
-    build: dotnet-stream-client-app
-    networks:
-      - rabbitnet
-    environment:                                 
-      - RABBITMQ_HOST=haproxy
-      - RABBITMQ_PORT=5552                       
-    depends_on:
-      - rmq0
-      - rmq1
-      - rmq2
-      - haproxy
-    restart: on-failure
-    stop_grace_period: 30s
-  java-stream-client-app:
-    build: java-stream-client-app
-    networks:
-      - rabbitnet
-    environment:
-      - RABBITMQ_HOST=haproxy
-      - RABBITMQ_PORT=5552
-    depends_on:
-      - rmq0
-      - rmq1
-      - rmq2
-      - haproxy
-    restart: on-failure
-    stop_grace_period: 30s
+  ## dotnet-stream-client-app:
+  ##   build: dotnet-stream-client-app
+  ##   networks:
+  ##     - rabbitnet
+  ##   environment:                                 
+  ##     - RABBITMQ_HOST=haproxy
+  ##     - RABBITMQ_PORT=5552                       
+  ##   depends_on:
+  ##     - rmq0
+  ##     - rmq1
+  ##     - rmq2
+  ##     - haproxy
+  ##   restart: on-failure
+  ##   stop_grace_period: 30s
+  ## java-stream-client-app:
+  ##   build: java-stream-client-app
+  ##   networks:
+  ##     - rabbitnet
+  ##   environment:
+  ##     - RABBITMQ_HOST=haproxy
+  ##     - RABBITMQ_PORT=5552
+  ##   depends_on:
+  ##     - rmq0
+  ##     - rmq1
+  ##     - rmq2
+  ##     - haproxy
+  ##   restart: on-failure
+  ##   stop_grace_period: 30s
   haproxy:
     build: rmq1
     image: haproxy:latest

@@ -37,4 +37,4 @@ run-dotnet-app:
 	$(MAKE) -C $(CURDIR)/dotnet-stream-client-app run
 
 run-stream-perf-test:
-	docker run --rm --pull always --network rabbitnet pivotalrabbitmq/stream-perf-test:latest --uris rabbitmq-stream://haproxy:5552 --producers 5 --consumers 5 --rate 1000 --delete-streams --max-age PT30S --load-balancer
+	docker run --rm --pull always --network rabbitnet pivotalrabbitmq/stream-perf-test:latest --uris rabbitmq-stream://haproxy:5552 --producers 5 --consumers 5 --rate 1000 --delete-streams --max-age PT30S --load-balancer --force-replica-for-consumers

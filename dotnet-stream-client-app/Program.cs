@@ -50,7 +50,7 @@ public class StreamClient
                 options.TimestampFormat = "[HH:mm:ss] ";
                 options.ColorBehavior = LoggerColorBehavior.Default;
             })
-            .AddFilter("RabbitMQ.Stream.Client.StreamSystem", LogLevel.Critical)
+            // .AddFilter("RabbitMQ.Stream.Client.StreamSystem", LogLevel.Critical)
             .AddFilter(level => level >= LogLevel.Information)
         );
 

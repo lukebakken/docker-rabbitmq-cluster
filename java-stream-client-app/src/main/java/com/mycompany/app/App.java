@@ -105,6 +105,7 @@ public class App {
                     .username(user)
                     .password(password)
                     .clientProperty("connection_name", "rabbitmq-stream-consumer-" + i)
+                    .forceReplicaForConsumers(true)
                     .build();
             environments.add(env);
 
