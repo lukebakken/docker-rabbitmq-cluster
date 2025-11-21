@@ -21,7 +21,7 @@ public class App {
     private static final List<Producer> producers = new ArrayList<>();
     private static final List<Consumer> consumers = new ArrayList<>();
     private static final int NUM_PRODUCERS = 2;
-    private static final int NUM_CONSUMERS = 5;
+    private static final int NUM_CONSUMERS = 10;
 
     public static void main(String[] args) throws Exception {
         System.out.println("Application starting, registering signal handlers...");
@@ -93,6 +93,7 @@ public class App {
                     .name("producer_" + i)
                     .build();
             producers.add(producer);
+            System.out.println(String.format("Created producer_%d (connection: rabbitmq-stream-producer-%d)", i, i));
         }
 
         // Create consumers with separate environments
@@ -115,6 +116,7 @@ public class App {
                     })
                     .build();
             consumers.add(consumer);
+            System.out.println(String.format("Created consumer_%d (connection: rabbitmq-stream-consumer-%d)", i, i));
         }
 
         // Start summary logging thread

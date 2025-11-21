@@ -31,7 +31,7 @@ public class StreamClient
         public int Producers { get; set; } = 2;
         public byte ProducersPerConnection { get; set; } = 1;
         public int MessagesPerProducer { get; set; } = 5_000_000;
-        public int Consumers { get; set; } = 5;
+        public int Consumers { get; set; } = 10;
         public byte ConsumersPerConnection { get; set; } = 1;
 
         public int DelayDuringSendMs { get; set; } = 100;
@@ -254,6 +254,11 @@ public class StreamClient
                         lc.LogInformation(
                             "Consumer: {Id} - status changed from: {From} to: {To} reason: {Reason}  {Info}",
                             status.Identifier, status.From, status.To, status.Reason, streamInfo);
+
+                        if (status.To == ReliableEntityStatus.Open)
+                        {
+                            Console.WriteLine($"Consumer {status.Identifier} connected to node");
+                        }
                     };
                     consumersList.Add(
                         await Consumer.Create(conf, lc));
@@ -322,7 +327,7 @@ public class StreamClient
 
                             // just log the status change
                             lp.LogInformation(
-                                "Consumer: {Id} - status changed from: {From} to: {To} reason: {Reason}  {Info}",
+                                "Producer: {Id} - status changed from: {From} to: {To} reason: {Reason}  {Info}",
                                 status.Identifier, status.From, status.To, status.Reason, streamInfo);
 
                             // in case of disconnection the event will be reset
@@ -330,6 +335,7 @@ public class StreamClient
                             // It is important to use the ManualReset to avoid to send messages before the producer is ready
                             if (status.To == ReliableEntityStatus.Open)
                             {
+                                Console.WriteLine($"Producer {status.Identifier} connected to node");
                                 publishEvent.Set();
                             }
                             else
