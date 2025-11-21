@@ -96,6 +96,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Wait for stream to be available across cluster
+	time.Sleep(3 * time.Second)
+
 	var producerWg sync.WaitGroup
 	var consumerWg sync.WaitGroup
 	var totalSent atomic.Int64

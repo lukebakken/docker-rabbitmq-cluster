@@ -1,0 +1,10 @@
+Go Stream Client Application
+Connecting to localhost:5552
+Creating stream: go-stream-client-app
+Starting 2 producers (500000 messages each)
+Starting 10 consumers
+[13:11:37] Sent: 59002, Confirmed: 59002, Consumed: 77314, Elapsed: 5s
+[13:11:42] Sent: 156002, Confirmed: 156002, Consumed: 152762, Elapsed: 10s
+[13:11:47] Sent: 254002, Confirmed: 254002, Consumed: 224820, Elapsed: 15s
+[13:11:52] Sent: 352002, Confirmed: 352002, Consumed: 301260, Elapsed: 20s
+[13:11:57] Sent: 450002, Confirmed: 450002, Consumed: 374800, Elapsed: 25s
