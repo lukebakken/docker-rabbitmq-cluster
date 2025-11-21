@@ -220,8 +220,13 @@ func main() {
 			consumers = append(consumers, consumer)
 			consumersMutex.Unlock()
 
-			channelClose := consumer.NotifyClose()
-			<-channelClose
+			// Keep consumer alive until closed
+			select {
+			case <-ctx.Done():
+				return
+			case <-consumer.NotifyClose():
+				return
+			}
 		}(i)
 	}
 

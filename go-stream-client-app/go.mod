@@ -4,7 +4,7 @@ go 1.24.0
 
 require github.com/rabbitmq/rabbitmq-stream-go-client v1.4.8
 
-replace github.com/rabbitmq/rabbitmq-stream-go-client => github.com/lukebakken/rmq-rabbitmq-stream-go-client v0.0.0-20251121210012-11465b727a8f
+replace github.com/rabbitmq/rabbitmq-stream-go-client => /home/lrbakken/development/rabbitmq/rabbitmq-stream-go-client // 79cd81e
 
 require (
 	github.com/golang/snappy v1.0.0 // indirect
