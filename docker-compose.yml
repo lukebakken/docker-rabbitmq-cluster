@@ -44,47 +44,50 @@ services:
       # HOST:CONTAINER
       - 8874:15672
       - 15694:15692
-  perf-test-producer:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy
-      - --servers-startup-timeout=45
-      - --rate=10
-      - --producers=1
-      - --consumers=0
-      - --confirm=16
-      - --confirm-timeout=60
-      - --exclusive
-      - --type topic
-      - --exchange TODO
-      - --flag=mandatory
-      - --flag=persistent
-      - --predeclared
-      - --size 64
-      - --queue-args=x-queue-type=classic
-    depends_on:
-      - rmq0
-      - rmq1
-      - rmq2
-      - haproxy
-    restart: on-failure
-  perf-test-consumer:
-    image: pivotalrabbitmq/perf-test:latest
-    networks:
-      - rabbitnet
-    command:
-      - --uri=amqp://haproxy
-      - --servers-startup-timeout=45
-      - --producers=0
-      - --consumers=1
-    depends_on:
-      - rmq0
-      - rmq1
-      - rmq2
-      - haproxy
-    restart: on-failure
+  # perf-test-producer:
+  #   image: pivotalrabbitmq/perf-test:latest
+  #   networks:
+  #     - rabbitnet
+  #   command:
+  #     - --uri=amqp://haproxy
+  #     - --servers-startup-timeout=45
+  #     - --rate=10
+  #     - --producers=1
+  #     - --consumers=0
+  #     - --confirm=16
+  #     - --confirm-timeout=60
+  #     - --exclusive
+  #     - --type topic
+  #     - --exchange my.exchange
+  #     - --routing-key my.key
+  #     - --flag=mandatory
+  #     - --flag=persistent
+  #     - --size 64
+  #     - --queue-args=x-queue-type=classic
+  #   depends_on:
+  #     - rmq0
+  #     - rmq1
+  #     - rmq2
+  #     - haproxy
+  #   restart: on-failure
+  # perf-test-consumer:
+  #   image: pivotalrabbitmq/perf-test:latest
+  #   networks:
+  #     - rabbitnet
+  #   command:
+  #     - --uri=amqp://haproxy
+  #     - --servers-startup-timeout=45
+  #     - --producers=0
+  #     - --consumers=1
+  #     - --type topic
+  #     - --exchange my.exchange
+  #     - --routing-key my.key
+  #   depends_on:
+  #     - rmq0
+  #     - rmq1
+  #     - rmq2
+  #     - haproxy
+  #   restart: on-failure
   haproxy:
     image: haproxy:latest
     networks:
