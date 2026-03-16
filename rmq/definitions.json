@@ -1,0 +1,1195 @@
+{
+    "rabbit_version": "4.2.4",
+    "rabbitmq_version": "4.2.4",
+    "product_name": "RabbitMQ",
+    "product_version": "4.2.4",
+    "rabbitmq_definition_format": "cluster",
+    "original_cluster_name": "rabbitmq",
+    "explanation": "Definitions of cluster 'rabbitmq'",
+    "users": [
+    ],
+    "vhosts": [
+        {
+            "name": "/",
+            "description": "Default virtual host",
+            "metadata": {
+                "description": "Default virtual host",
+                "tags": [],
+                "default_queue_type": "quorum"
+            },
+            "tags": []
+        }
+    ],
+    "permissions": [
+    ],
+    "topic_permissions": [],
+    "parameters": [],
+    "global_parameters": [
+        {
+            "name": "cluster_name",
+            "value": "rabbitmq"
+        },
+        {
+            "name": "cluster_tags",
+            "value": []
+        },
+        {
+            "name": "internal_cluster_id",
+            "value": "rabbitmq-cluster-id-NAO-xxOSWSlAU88L5kyLdQ"
+        }
+    ],
+    "policies": [
+        {
+            "vhost": "/",
+            "name": "stream-policy",
+            "pattern": "^(il.*v1|.*\\.stream\\..*v[0-9]+)$",
+            "apply-to": "streams",
+            "definition": {
+                "max-age": "8h",
+                "max-length-bytes": 10737418240,
+                "stream-max-segment-size-bytes": 134217728
+            },
+            "priority": 2
+        },
+        {
+            "vhost": "/",
+            "name": "cleanup-queues",
+            "pattern": ".*",
+            "apply-to": "queues",
+            "definition": {
+                "expires": 10800000
+            },
+            "priority": 0
+        }
+    ],
+    "queues": [
+        {
+            "name": "command.queue.number1",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "update.exchange.number3.reply.service2",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-expires": 604800000,
+                "x-message-ttl": 86400000,
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "command.queue.number2",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "command.queue.number3",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.C0130KBIoKJZp8bbAAAN.key1.4ff14eec-00fc-4f96-8d7c-e73c2f34b6f1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff1.xyz-76ccc968f5-hbgcv.c26b2ac6-33ba-4a2c-9a6d-4ce1657face4",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff9.xyz-76ccc968f5-hbgcv.996cb8f4-bd70-4c83-9bc0-b79a1fbbe5d1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.WOsHv8Erlx19fMAnAAAR.key1.169c09d4-f360-488b-bb15-ff19a72e70fb",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number5.sub.service1.stuff12.xyz-76ccc968f5-hbgcv.44f19a9a-e6a2-4ad1-aaec-8114d1e2f884",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.WOsHv8Erlx19fMAnAAAR.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number7.sub.service1.stuff4.xyz-76ccc968f5-8xftd.e277cc01-4f0e-4517-a925-7d1d2c0b79b6",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1.cf5b8bdc-ef3a-4fce-86b4-b61bc6a9922f",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1.9ce4c858-c072-4328-9e9c-66915dc7f5e1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number5.sub.service1.stuff8.xyz-76ccc968f5-hbgcv.5e1d1f3f-befa-47e4-9182-ca1f73b839de",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff2.xyz-76ccc968f5-hbgcv.97c066bc-cf97-4888-ba1a-87ecc5c8008d",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number5.sub.service1.stuff14.xyz-76ccc968f5-8xftd.d5ee533b-ac1b-4136-b9fd-ba59d73061d0",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff15.xyz-76ccc968f5-8xftd.f5cb634d-3b73-46fb-b4bf-40c3856e6402",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number3.sub.service1.stuff11.xyz-76ccc968f5-hbgcv.a0ac18b7-a72a-46aa-bf38-ef19cae48f29",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff15.xyz-76ccc968f5-hbgcv.9c9b9828-6f17-4d44-a125-97d83dd4938f",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff10.xyz-76ccc968f5-8xftd.505fe5d6-ad94-4aa2-ba46-44d8c76247d8",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.dyxmnLM7bteW6icqAAAP.key1.bde8673c-6787-4355-8280-3bfe29b9b2ae",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.WOsHv8Erlx19fMAnAAAR.key1.0bc6793f-726f-4b64-9fa6-a28fe0d045ae",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.iRHK-epoxt-9TB_3AAAT.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number10.sub.service1.stuff13.xyz-76ccc968f5-8xftd.113869d8-0173-402d-99b1-88ca3ccab61d",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1.7199b29d-e37d-4651-a637-5277e630c67c",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number4",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "update.exchange.number5.sub.service1.stuff14.xyz-76ccc968f5-hbgcv.42d645cc-7938-47e9-bccf-0244ff4c4c9e",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff5.xyz-76ccc968f5-8xftd.57d3da14-cc32-4396-986c-f04f27a24ef9",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number5.sub.service1.stuff12.xyz-76ccc968f5-8xftd.d006c18c-ac70-4feb-93e9-c79c3d44b56f",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "update.exchange.number8.C0130KBIoKJZp8bbAAAN.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number6",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "command.queue.number7",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "update.exchange.number10.sub.service1.stuff13.xyz-76ccc968f5-hbgcv.b8f82d2a-cf6f-4f5f-92bc-d35d6a87b90a",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.C0130KBIoKJZp8bbAAAN.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.WOsHv8Erlx19fMAnAAAR.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1.c0c5cbb2-e7bf-4245-9d0b-cd4edd089805",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff1.xyz-76ccc968f5-8xftd.10ea50c7-1412-40f4-a85d-1515a288ea58",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff2.xyz-76ccc968f5-8xftd.a27755fc-f89a-43be-ac77-9553be0054d4",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff3.xyz-76ccc968f5-8xftd.1fa3f77e-435e-44e8-9c0c-e70a3e53f72d",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1.8c39bd52-443b-42bc-baa4-e2550633f6a1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff3.xyz-76ccc968f5-hbgcv.7f0860a9-41c3-4776-a2e0-233839eedcc2",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number8",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "update.exchange.number7.sub.service1.stuff4.xyz-76ccc968f5-hbgcv.87e8af9a-f78a-4819-ba1f-c6fd49e2274e",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff5.xyz-76ccc968f5-hbgcv.3514585d-47f2-427f-99f5-72d589c4c293",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number9",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff6.xyz-76ccc968f5-8xftd.56c8d98c-01fe-4bfe-b3b2-6f325f1f25ce",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff7.xyz-76ccc968f5-hbgcv.e3ed68f8-2f83-4b57-b23b-f7870065040b",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number5.sub.service1.stuff8.xyz-76ccc968f5-8xftd.8466558e-d9a3-4289-8b22-dd3a862913e6",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number10",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.iRHK-epoxt-9TB_3AAAT.key1.290edcf2-0918-493e-8721-a3c26dbe0164",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.dyxmnLM7bteW6icqAAAP.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff9.xyz-76ccc968f5-8xftd.5a09864e-ab58-4357-8bfa-7bcd756key1eb",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1.d0161f73-3327-475c-a11d-1f49b3116eff",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff10.xyz-76ccc968f5-hbgcv.cd1b0147-3842-48e3-9a2d-57957e92222a",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.iRHK-epoxt-9TB_3AAAT.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number11",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff7.xyz-76ccc968f5-8xftd.d060e800-ddb4-4a83-bf14-417c571b3425",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1.e2662a69-fa85-4e5b-9cbf-ba78acf7491d",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.C0130KBIoKJZp8bbAAAN.key1.e067675a-5d20-4f3b-a669-ca4962ab2c60",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number12",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "command.queue.number13",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "update.exchange.number8.dyxmnLM7bteW6icqAAAP.key1",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number3.sub.service1.stuff11.xyz-76ccc968f5-8xftd.bda42b7e-2cab-452e-9d40-cc5053d41e6b",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number8.iRHK-epoxt-9TB_3AAAT.key1.d5c26083-d51e-45b5-9012-9d1dd619ee00",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number14",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+                "x-queue-type": "quorum"
+            }
+        },
+        {
+            "name": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1.d1a78344-3e5f-4e0c-8c8a-e7124b2d8132",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "update.exchange.number6.sub.service1.stuff6.xyz-76ccc968f5-hbgcv.5f400361-fe34-4419-b84e-0b86fe0bbc02",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        },
+        {
+            "name": "command.queue.number5.reply.service1.dyxmnLM7bteW6icqAAAP.key1.bff1a400-b991-4347-92c3-3721d9432325",
+            "vhost": "/",
+            "durable": false,
+            "auto_delete": true,
+            "arguments": {
+                "x-queue-type": "classic"
+            }
+        }
+    ],
+    "exchanges": [
+        {
+            "name": "update.exchange.number1",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number2",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number3",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number4",
+            "vhost": "/",
+            "type": "fanout",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number5",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number6",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number7",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number8",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number9",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number10",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
+            "name": "update.exchange.number11",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        }
+    ],
+    "bindings": [
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.C0130KBIoKJZp8bbAAAN.key1",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.WOsHv8Erlx19fMAnAAAR.key1",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1.9ce4c858-c072-4328-9e9c-66915dc7f5e1",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number6",
+            "vhost": "/",
+            "destination": "update.exchange.number6.sub.service1.stuff10.xyz-76ccc968f5-8xftd.505fe5d6-ad94-4aa2-ba46-44d8c76247d8",
+            "destination_type": "queue",
+            "routing_key": "key2",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number3",
+            "vhost": "/",
+            "destination": "update.exchange.number3.sub.service1.stuff11.xyz-76ccc968f5-8xftd.bda42b7e-2cab-452e-9d40-cc5053d41e6b",
+            "destination_type": "queue",
+            "routing_key": "key3",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number5",
+            "vhost": "/",
+            "destination": "update.exchange.number5.sub.service1.stuff12.xyz-76ccc968f5-8xftd.d006c18c-ac70-4feb-93e9-c79c3d44b56f",
+            "destination_type": "queue",
+            "routing_key": "key4",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.iRHK-epoxt-9TB_3AAAT.key1.d5c26083-d51e-45b5-9012-9d1dd619ee00",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number6",
+            "vhost": "/",
+            "destination": "update.exchange.number6.sub.service1.stuff5.xyz-76ccc968f5-8xftd.57d3da14-cc32-4396-986c-f04f27a24ef9",
+            "destination_type": "queue",
+            "routing_key": "key5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number6",
+            "vhost": "/",
+            "destination": "update.exchange.number6.sub.service1.stuff7.xyz-76ccc968f5-8xftd.d060e800-ddb4-4a83-bf14-417c571b3425",
+            "destination_type": "queue",
+            "routing_key": "key6",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.C0130KBIoKJZp8bbAAAN.key1.4ff14eec-00fc-4f96-8d7c-e73c2f34b6f1",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.C0130KBIoKJZp8bbAAAN.key1",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number6",
+            "vhost": "/",
+            "destination": "update.exchange.number6.sub.service1.stuff6.xyz-76ccc968f5-8xftd.56c8d98c-01fe-4bfe-b3b2-6f325f1f25ce",
+            "destination_type": "queue",
+            "routing_key": "key7",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number3",
+            "vhost": "/",
+            "destination": "update.exchange.number3.sub.service1.stuff11.xyz-76ccc968f5-8xftd.bda42b7e-2cab-452e-9d40-cc5053d41e6b",
+            "destination_type": "queue",
+            "routing_key": "key8",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.WOsHv8Erlx19fMAnAAAR.key1.0bc6793f-726f-4b64-9fa6-a28fe0d045ae",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.iRHK-epoxt-9TB_3AAAT.key1",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number6",
+            "vhost": "/",
+            "destination": "update.exchange.number6.sub.service1.stuff2.xyz-76ccc968f5-8xftd.a27755fc-f89a-43be-ac77-9553be0054d4",
+            "destination_type": "queue",
+            "routing_key": "key9",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.iRHK-epoxt-9TB_3AAAT.key1",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.dyxmnLM7bteW6icqAAAP.key1",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number10",
+            "vhost": "/",
+            "destination": "update.exchange.number10.sub.service1.stuff13.xyz-76ccc968f5-8xftd.113869d8-0173-402d-99b1-88ca3ccab61d",
+            "destination_type": "queue",
+            "routing_key": "key10",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number6",
+            "vhost": "/",
+            "destination": "update.exchange.number6.sub.service1.stuff3.xyz-76ccc968f5-8xftd.1fa3f77e-435e-44e8-9c0c-e70a3e53f72d",
+            "destination_type": "queue",
+            "routing_key": "key11",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number5",
+            "vhost": "/",
+            "destination": "update.exchange.number5.sub.service1.stuff8.xyz-76ccc968f5-hbgcv.5e1d1f3f-befa-47e4-9182-ca1f73b839de",
+            "destination_type": "queue",
+            "routing_key": "key4",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1.d0161f73-3327-475c-a11d-1f49b3116eff",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number3",
+            "vhost": "/",
+            "destination": "update.exchange.number3.sub.service1.stuff11.xyz-76ccc968f5-8xftd.bda42b7e-2cab-452e-9d40-cc5053d41e6b",
+            "destination_type": "queue",
+            "routing_key": "key12",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1.c0c5cbb2-e7bf-4245-9d0b-cd4edd089805",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1.e2662a69-fa85-4e5b-9cbf-ba78acf7491d",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.WOsHv8Erlx19fMAnAAAR.key1",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number5",
+            "vhost": "/",
+            "destination": "update.exchange.number5.sub.service1.stuff14.xyz-76ccc968f5-8xftd.d5ee533b-ac1b-4136-b9fd-ba59d73061d0",
+            "destination_type": "queue",
+            "routing_key": "key13",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.iRHK-epoxt-9TB_3AAAT.key1.290edcf2-0918-493e-8721-a3c26dbe0164",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number6",
+            "vhost": "/",
+            "destination": "update.exchange.number6.sub.service1.stuff9.xyz-76ccc968f5-8xftd.5a09864e-ab58-4357-8bfa-7bcd756key1eb",
+            "destination_type": "queue",
+            "routing_key": "ManualRidsStatusUpdate",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number6",
+            "vhost": "/",
+            "destination": "update.exchange.number6.sub.service1.stuff15.xyz-76ccc968f5-8xftd.f5cb634d-3b73-46fb-b4bf-40c3856e6402",
+            "destination_type": "queue",
+            "routing_key": "FodSimStatusUpdate",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1.8c39bd52-443b-42bc-baa4-e2550633f6a1",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1.7199b29d-e37d-4651-a637-5277e630c67c",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number5",
+            "vhost": "/",
+            "destination": "update.exchange.number5.sub.service1.stuff8.xyz-76ccc968f5-8xftd.8466558e-d9a3-4289-8b22-dd3a862913e6",
+            "destination_type": "queue",
+            "routing_key": "key4",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number3",
+            "vhost": "/",
+            "destination": "update.exchange.number3.sub.service1.stuff11.xyz-76ccc968f5-8xftd.bda42b7e-2cab-452e-9d40-cc5053d41e6b",
+            "destination_type": "queue",
+            "routing_key": "AlarmDeletionEvent",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number5",
+            "vhost": "/",
+            "destination": "update.exchange.number5.sub.service1.stuff12.xyz-76ccc968f5-hbgcv.44f19a9a-e6a2-4ad1-aaec-8114d1e2f884",
+            "destination_type": "queue",
+            "routing_key": "key4",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.dyxmnLM7bteW6icqAAAP.key1.bff1a400-b991-4347-92c3-3721d9432325",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.Bu2IpgSd6YPKKcnOAAAL.key1.d1a78344-3e5f-4e0c-8c8a-e7124b2d8132",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number5",
+            "vhost": "/",
+            "destination": "update.exchange.number5.sub.service1.stuff14.xyz-76ccc968f5-hbgcv.42d645cc-7938-47e9-bccf-0244ff4c4c9e",
+            "destination_type": "queue",
+            "routing_key": "key13",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.C0130KBIoKJZp8bbAAAN.key1.e067675a-5d20-4f3b-a669-ca4962ab2c60",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number6",
+            "vhost": "/",
+            "destination": "update.exchange.number6.sub.service1.stuff1.xyz-76ccc968f5-8xftd.10ea50c7-1412-40f4-a85d-1515a288ea58",
+            "destination_type": "queue",
+            "routing_key": "StandStatusUpdate",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.dyxmnLM7bteW6icqAAAP.key1.bde8673c-6787-4355-8280-3bfe29b9b2ae",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number10",
+            "vhost": "/",
+            "destination": "update.exchange.number10.sub.service1.stuff13.xyz-76ccc968f5-8xftd.113869d8-0173-402d-99b1-88ca3ccab61d",
+            "destination_type": "queue",
+            "routing_key": "equipmentInserted",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number3",
+            "vhost": "/",
+            "destination": "update.exchange.number3.reply.service2",
+            "destination_type": "queue",
+            "routing_key": "key12",
+            "arguments": {}
+        },
+        {
+            "source": "update.exchange.number8",
+            "vhost": "/",
+            "destination": "update.exchange.number8.WOsHv8Erlx19fMAnAAAR.key1.169c09d4-f360-488b-bb15-ff19a72e70fb",
+            "destination_type": "queue",
+            "routing_key": "key1",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.dyxmnLM7bteW6icqAAAP.key1",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        },
+        {
+            "source": "amq.direct",
+            "vhost": "/",
+            "destination": "command.queue.number5.reply.service1.Bu2IpgSd6YPKKcnOAAAL.key1.cf5b8bdc-ef3a-4fce-86b4-b61bc6a9922f",
+            "destination_type": "queue",
+            "routing_key": "command.queue.number5",
+            "arguments": {}
+        }
+    ]
+}

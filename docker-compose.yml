@@ -44,43 +44,41 @@ services:
       # HOST:CONTAINER
       - 8874:15672
       - 15694:15692
-  perf-test:
+  perf-test-producer:
     image: pivotalrabbitmq/perf-test:latest
     networks:
       - rabbitnet
     command:
       - --uri=amqp://haproxy
       - --servers-startup-timeout=45
-      - --rate=100
-      - --producers=5
-      - --consumers=5
-      - --confirm=32
-      - --confirm-timeout=800
+      - --rate=10
+      - --producers=1
+      - --consumers=0
+      - --confirm=16
+      - --confirm-timeout=60
+      - --exclusive
+      - --type topic
+      - --exchange TODO
       - --flag=mandatory
       - --flag=persistent
-      - --queue-args=x-queue-type=quorum
-      - --auto-delete=false
-      - --queue-pattern=perf-test-%03d
-      - --queue-pattern-from=0
-      - --queue-pattern-to=4
+      - --predeclared
+      - --size 64
+      - --queue-args=x-queue-type=classic
     depends_on:
       - rmq0
       - rmq1
       - rmq2
       - haproxy
     restart: on-failure
-  stream-perf-test:
-    image: pivotalrabbitmq/stream-perf-test:latest
+  perf-test-consumer:
+    image: pivotalrabbitmq/perf-test:latest
     networks:
       - rabbitnet
     command:
-      - --uris rabbitmq-stream://haproxy:5552
-      - --load-balancer
-      - --producers 5
-      - --consumers 5
-      - --rate 1000
-      - --delete-streams
-      - --max-age PT30S
+      - --uri=amqp://haproxy
+      - --servers-startup-timeout=45
+      - --producers=0
+      - --consumers=1
     depends_on:
       - rmq0
       - rmq1
@@ -101,4 +99,3 @@ services:
       # HOST:CONTAINER
       - 15672:15672
       - 5672:5672
-      - 5552:5552
