@@ -1,0 +1,12 @@
+{
+  "name": "amqplib-client",
+  "version": "1.0.0",
+  "description": "Reproducer for 'Frame size exceeds frame max' with amqplib default frameMax",
+  "scripts": {
+    "publisher": "node publisher.js",
+    "consumer": "node consumer.js"
+  },
+  "dependencies": {
+    "amqplib": "0.10.6"
+  }
+}
