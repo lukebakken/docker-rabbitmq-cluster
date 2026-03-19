@@ -129,6 +129,93 @@ make use-broken
 
 ### npm install
 
-The `run-publisher` and `run-consumer` targets run `npm install` automatically
-if `amqplib-client/node_modules` is out of date. After `make use-fixed` or
-`make use-broken`, the next `run-*` invocation will reinstall automatically.
+The `run-publisher`, `run-consumer`, `run-publisher-dlx`, and `run-consumer-dlx`
+targets run `npm install` automatically if `amqplib-client/node_modules` is out
+of date. After `make use-fixed` or `make use-broken`, the next `run-*`
+invocation will reinstall automatically.
+
+---
+
+## Reproducer: x-death header accumulation
+
+### Background
+
+Every time RabbitMQ dead-letters a message (due to TTL expiry, rejection, or
+queue length overflow), it appends an entry to the `x-death` header array.
+The deduplication key is `{queue, reason}` — each unique combination adds one
+entry. With enough unique dead-letter queues in a retry chain, the `x-death`
+array can grow large enough to exceed `frameMax` when encoded as an AMQP
+header frame, triggering the same "Frame size exceeds frame max" error.
+
+### Topology
+
+A hub-and-spoke TTL retry pattern with 20 delay buckets:
+
+```
+work-exchange --> order-processor (work queue)
+                       |
+                    (consumer acks, republishes to next bucket)
+                       v
+               retry-exchange
+                       |
+           (routes by bucket name)
+                       v
+  retry-order-processing-service-worker-aggregation-results-bucket-v2-NN
+                  (TTL expires)
+                       |
+                       v
+          retry-output-exchange --> order-processor
+                  (x-death entry added by RabbitMQ)
+```
+
+Each pass through a unique bucket adds one `x-death` entry (~200 bytes with
+~70-character queue names). After 14-15 buckets the encoded `x-death` array
+exceeds 4096 bytes, triggering the error on the next delivery.
+
+### Reproduce the error
+
+In one terminal, start the consumer:
+
+```
+make run-consumer-dlx
+```
+
+In another terminal, publish one message:
+
+```
+make run-publisher-dlx
+```
+
+The consumer logs the x-death array growing on each delivery:
+
+```
+Connected (frameMax: 4096 bytes)
+Consuming from order-processor...
+Watching x-death grow across 20 retry buckets.
+Error expected after ~105s
+
+Delivery: x-death entries=0, next bucket=1/20
+  Routing to: retry-order-processing-service-worker-aggregation-results-bucket-v2-01 (TTL: 500ms)
+Delivery: x-death entries=1, next bucket=2/20
+  Last x-death: queue=retry-order-processing-service-worker-aggregation-results-bucket-v2-01, reason=expired, count=1
+  Routing to: retry-order-processing-service-worker-aggregation-results-bucket-v2-02 (TTL: 1000ms)
+...
+Delivery: x-death entries=14, next bucket=15/20
+  Last x-death: queue=retry-order-processing-service-worker-aggregation-results-bucket-v2-01, reason=expired, count=1
+  Routing to: retry-order-processing-service-worker-aggregation-results-bucket-v2-15 (TTL: 7500ms)
+Connection error: Error: Frame size exceeds frame max
+    at parseFrame (.../amqplib/lib/frame.js:55:13)
+    at C.recvFrame (.../amqplib/lib/connection.js:613:15)
+    at Socket.go (.../amqplib/lib/connection.js:486:30)
+Connection closed.
+```
+
+### Demonstrate the fix
+
+```
+make use-fixed
+```
+
+Then rerun `make run-consumer-dlx` and `make run-publisher-dlx`. The consumer
+receives all deliveries cleanly because amqplib 0.10.6 defaults `frameMax` to
+131072 bytes, which is large enough to accommodate the full x-death array.
