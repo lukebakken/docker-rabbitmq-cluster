@@ -69,6 +69,32 @@ services:
       - rmq2
       - haproxy
     restart: on-failure
+  perf-test-qq:
+    image: pivotalrabbitmq/perf-test:latest
+    networks:
+      - rabbitnet
+    command:
+      - --uri=amqp://haproxy
+      - --servers-startup-timeout=45
+      - --rate=100
+      - --producers=5
+      - --consumers=5
+      - --confirm=32
+      - --confirm-timeout=800
+      - --flag=mandatory
+      - --flag=persistent
+      - --queue-args=x-queue-type=classic
+      - --auto-delete=false
+      - --queue-pattern=perf-test-qq-%03d
+      - --queue-pattern-from=0
+      - --queue-pattern-to=4
+      - --quorum-queue
+    depends_on:
+      - rmq0
+      - rmq1
+      - rmq2
+      - haproxy
+    restart: on-failure
   haproxy:
     image: haproxy:latest
     networks:
