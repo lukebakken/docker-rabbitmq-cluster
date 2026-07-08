@@ -29,7 +29,7 @@ export LINK_ATTEMPTS      ?= 40
 # REBALANCE_ATTEMPTS x5s = up to 300s for leaders to converge after a rebalance
 export REBALANCE_ATTEMPTS ?= 60
 
-clean: perms
+clean: down perms
 	git clean -xffd
 
 down:
