@@ -2,9 +2,6 @@ ARG RABBITMQ_DOCKER_TAG=rabbitmq:4-management
 
 FROM ${RABBITMQ_DOCKER_TAG}
 
-# ENV LOG=debug RABBITMQ_FEATURE_FLAGS=khepri_db
-ENV RABBITMQ_FEATURE_FLAGS=khepri_db
-
 RUN set -eux; \
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
