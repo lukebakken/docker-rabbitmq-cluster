@@ -1,5 +1,24 @@
 # TODO
 
+## Queue federation has the same #11495 exposure (fix is exchange-only)
+
+The committed fix (`rabbit_federation_exchange:recover_links/0` boot step) covers
+**exchange** federation only. Queue federation has the identical `New == Old` gate:
+`rabbit_queue_decorator:maybe_recover/1` only calls `startup/1` ->
+`rabbit_federation_queue_link_sup_sup:start_child/1` when decorators changed, and it
+uses the same `mirrored_supervisor` / `ram_copies` roster
+(`rabbit_federation_queue_link_sup_sup`). So a rolling restart would strand
+queue-federation links the same way.
+
+NOT yet done, and deliberately not blindly patched:
+- Reproduce the queue-side strand first (add *federated queues* to the repro topology;
+  current topology is exchange-federation only) before writing a fix — verify then fix.
+- If confirmed, add a parallel `recover_links/0` boot step in `rabbit_federation_queue`
+  (mirroring the exchange fix), and a `start_child_status/1` in
+  `rabbit_federation_queue_link_sup_sup`.
+- Open question: does Amazon MQ / the b-8a4cc67f customer actually use queue federation?
+  The incident was exchange federation; queue-side may be latent-only for this customer.
+
 ## Add message load during the restart loop (deferred)
 
 The restart loop currently exercises `make restart-loop` against an **idle**
