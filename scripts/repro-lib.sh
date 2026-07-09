@@ -75,11 +75,20 @@ count_links() {
 }
 
 # Count federation-internal queues (auto-created, one per running link, named
-# "federation: <exch> -> <node>:<hub>:<exch>"). In a healthy cluster this equals
-# the running-link count 1:1. A drain/revive cycle can leave orphaned internal
-# queues behind (consumerless, naming the node the link ran on at creation),
-# so a count exceeding the running-link count is the #11495 roster leak -- and
-# it is invisible to count_links, which stays at baseline throughout.
+# "federation: <exch> -> <cluster_name>:<vhost>:<exch>"). In a healthy cluster
+# with a stable cluster_name this equals the running-link count 1:1.
+#
+# NOTE: a count exceeding the running-link count is NOT the #11495 roster
+# stranding. It is an artifact of an UNSET cluster_name: rabbit_nodes:cluster_name()
+# then defaults to the node name (rabbit_nodes.erl:cluster_name_default/0), so
+# the queue name embeds the node the link ran on. When a link migrates during a
+# drain, the new link creates a freshly-named queue and the old one is stranded
+# consumerless -- one orphan generation per migration. Setting cluster_name to a
+# stable value (see rmq/rabbitmq.conf) makes the name node-independent, the queue
+# is reused across migrations, and this count returns to a clean 1:1. The
+# customer's broker has a stable cluster_name and shows no such orphans (flat
+# classic-queue count across both maintenance windows). The real #11495 signal is
+# count_links dropping below baseline, checked separately.
 count_internal_queues() {
     local -i port
     port=$(live_port) || { printf '0'; return 0; }
@@ -224,11 +233,12 @@ print_status() {
 # each pass:
 #   1. running-link count drops below baseline (links fail to re-establish) --
 #      hard failure, returns non-zero.
-#   2. internal-queue count exceeds the running-link count -- the #11495 roster
-#      leak: orphaned federation-internal queues left behind by drain/revive.
-#      This is INVISIBLE to signal 1 (the running-link count returns to baseline
-#      while orphans accumulate), so it is reported per pass and tracked, but
-#      does NOT abort -- run multiple passes to watch it compound.
+#   2. internal-queue count exceeds the running-link count -- consumerless
+#      orphaned federation-internal queues left behind by drain/revive. NOTE:
+#      this is NOT the #11495 roster stranding; it is an artifact of an unset
+#      cluster_name (see the count_internal_queues comment). With a stable
+#      cluster_name set (rmq/rabbitmq.conf) it stays a clean 1:1. It is reported
+#      per pass but does NOT abort.
 restart_loop() {
     wait_for_live || return 1
     local -i baseline baseline_internal
@@ -260,7 +270,7 @@ restart_loop() {
         orphans=$(( internal - links ))
         if (( orphans > 0 ))
         then
-            echo "pass $iter: $links links running, but $internal internal queues -> $orphans ORPHANED (roster leak)"
+            echo "pass $iter: $links links running, but $internal internal queues -> $orphans orphaned (unset-cluster_name artifact, not #11495)"
         else
             echo "pass $iter: $links links running, $internal internal queues (clean 1:1)"
         fi
