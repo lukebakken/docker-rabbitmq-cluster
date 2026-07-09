@@ -19,6 +19,50 @@ NOT yet done, and deliberately not blindly patched:
 - Open question: does Amazon MQ / the b-8a4cc67f customer actually use queue federation?
   The incident was exchange federation; queue-side may be latent-only for this customer.
 
+## Latest RabbitMQ (4.2 main) is still affected — verified in source 2026-07-09
+
+Checked `/home/lrbakken/development/rabbitmq/rabbitmq-server` @ `abfa23b089`
+(`v4.2.0-beta.4-2188`, main). In 4.2 the federation plugins were split into
+`rabbitmq_exchange_federation`, `rabbitmq_queue_federation`, and
+`rabbitmq_federation_common`, but the #11495 mechanism is intact:
+
+- **Strand gate still present.** `rabbit_exchange_decorator:maybe_recover/1`
+  (`deps/rabbit/src/rabbit_exchange_decorator.erl:107-117`) still has the exact
+  `case New of Old -> ok` short-circuit; `rabbit_queue_decorator:maybe_recover/1`
+  (`rabbit_queue_decorator.erl:63-77`) has the identical gate. The dead-pid
+  self-heal still lives only inside `start_child`/`create_or_update`, reached
+  only when the gate is NOT taken.
+- **No reconcile boot step upstream.** `rabbit_federation_exchange.erl` in 4.2 has
+  only the decorator-registration boot step (`{requires,[rabbit_registry,recovery]}`)
+  — no roster-reconcile step like our fix. So upstream has NOT closed the strand;
+  the fix's mechanism is still needed on main.
+- **Queue federation confirmed same exposure on 4.2.** `rabbit_federation_queue.erl:33`
+  drives `rabbit_federation_queue_link_sup_sup:start_child/1`, and that sup_sup is a
+  `mirrored_supervisor` (`rabbit_federation_queue_link_sup_sup.erl:10`) — same
+  ram_copies roster + same gate. This upgrades the "Queue federation" section above
+  from inference to source-verified against latest.
+
+Deferred (not started): porting the reconcile fix to 4.2 main (both exchange and
+queue federation) and validating there. The 3.13.7 fix branch stands on its own for
+the customer's broker; a 4.2 port is a separate upstream contribution.
+
+## Orphaned-internal-queue behavior on 4.2 (unset cluster_name) — verified, benign
+
+`upstream_queue_name/3` in 4.2 (`deps/rabbitmq_exchange_federation/src/rabbit_federation_exchange_link.erl:742-753`)
+STILL embeds `rabbit_nodes:cluster_name()` in the internal queue name
+(`"federation: <X> -> <cluster_name>:<vhost>:<X>"`), and `cluster_name()` still
+defaults to the node name when unset (`rabbit_nodes:cluster_name_default/0`). So the
+same node-name-rotation-on-migration behavior exists on latest. This is NOT a broker
+bug — it is benign whenever `cluster_name` is set (as on the customer's broker,
+`RetailPlatform`, and now on this harness via `rmq/rabbitmq.conf`). It only produced
+consumerless orphan queues in this harness because cluster_name was unset.
+
+Documentation decision (2026-07-09): keep this documented HERE (repro TODO.md) and in
+the harness memory only. It is a harness-config gotcha, not a customer-facing defect
+and not worth an upstream issue. The `rmq/rabbitmq.conf` comment already records the
+"why"; the count_internal_queues / restart_loop comments in `scripts/repro-lib.sh`
+explain that a non-1:1 internal-queue count is this artifact, not the #11495 strand.
+
 ## Add message load during the restart loop (deferred)
 
 The restart loop currently exercises `make restart-loop` against an **idle**
