@@ -8,6 +8,18 @@ SHELL := bash
 DOCKER_FRESH ?= false
 RABBITMQ_DOCKER_TAG ?= rabbitmq:3.13.7-management
 
+# Broker major version parsed from the image tag (rabbitmq:4.3.2-management -> 4,
+# rabbitmq:3.13.7-management-11495fix -> 3). Used to pick the definitions file:
+# 4.0 removed classic mirroring, so ha-* policies must be absent (see
+# definitions-4x.json / gen_definitions.py --target 4.x). Major 3 gets the
+# historical definitions.json; anything else gets the ha-*-free 4.x variant.
+RABBITMQ_MAJOR := $(shell echo '$(RABBITMQ_DOCKER_TAG)' | sed -E 's/^.*://; s/^([0-9]+).*/\1/')
+ifeq ($(RABBITMQ_MAJOR),3)
+DEFINITIONS_DEFAULT := definitions.json
+else
+DEFINITIONS_DEFAULT := definitions-4x.json
+endif
+
 # --- #11495 reproduction knobs -------------------------------------------
 # Exported so scripts/repro-lib.sh sees them; the lib mirrors each default.
 export HOST               ?= 127.0.0.1
@@ -15,7 +27,7 @@ export RMQ_USER           ?= guest
 export RMQ_PASS           ?= guest
 export NODES              ?= rmq0 rmq1 rmq2
 export MGMT_PORTS         ?= 8872 8873 8874
-export DEFINITIONS        ?= definitions.json
+export DEFINITIONS        ?= $(DEFINITIONS_DEFAULT)
 # RESTART_MODE: drain = AMQ graceful (upgrade drain/revive); node = abrupt restart; app = stop_app/start_app
 export RESTART_MODE       ?= drain
 # RESTART_ITERATIONS: rolling passes; #11495 strands "around the 20th"
