@@ -1,23 +1,26 @@
 # TODO
 
-## Queue federation has the same #11495 exposure (fix is exchange-only)
+## Queue federation #11495 fix — DONE (commit 0cfaa92f70), validated by analysis
 
-The committed fix (`rabbit_federation_exchange:recover_links/0` boot step) covers
-**exchange** federation only. Queue federation has the identical `New == Old` gate:
-`rabbit_queue_decorator:maybe_recover/1` only calls `startup/1` ->
-`rabbit_federation_queue_link_sup_sup:start_child/1` when decorators changed, and it
-uses the same `mirrored_supervisor` / `ram_copies` roster
-(`rabbit_federation_queue_link_sup_sup`). So a rolling restart would strand
-queue-federation links the same way.
+Queue federation had the identical `New == Old` exposure as exchange federation
+(`rabbit_queue_decorator:maybe_recover/1` -> `startup/1` ->
+`rabbit_federation_queue_link_sup_sup:start_child/1`, same `mirrored_supervisor` /
+`ram_copies` roster). Fixed by mirroring the exchange reconcile:
+`rabbit_federation_queue:recover_links/0` boot step + `start_child_status/1` in
+`rabbit_federation_queue_link_sup_sup`. Commit `0cfaa92f70` on branch
+`fix/federation-link-roster-stranding-11495`. Compiles clean via `make`.
 
-NOT yet done, and deliberately not blindly patched:
-- Reproduce the queue-side strand first (add *federated queues* to the repro topology;
-  current topology is exchange-federation only) before writing a fix — verify then fix.
-- If confirmed, add a parallel `recover_links/0` boot step in `rabbit_federation_queue`
-  (mirroring the exchange fix), and a `start_child_status/1` in
-  `rabbit_federation_queue_link_sup_sup`.
-- Open question: does Amazon MQ / the b-8a4cc67f customer actually use queue federation?
-  The incident was exchange federation; queue-side may be latent-only for this customer.
+Validated by analysis, not reproduction: queue and exchange federation share the
+same roster machinery and same start_child/self-heal path, so the fix works for
+the same reason the (fully reproduced) exchange fix does. Residual gap: never run
+against actual federated queues (harness topology is exchange-only). Rationale +
+how to close it later: see `federation-queue-fix-validation.md` in the issue dir
+(V2256564873_AMQ-190740).
+
+Note: the graceful-drain port (4.x #15271 backport to 3.13.x) was considered and
+DECLINED — the boot reconcile already prevents the persistent outage on the drain
+path, and 3.13.x is being retired by end of 2027. See
+`federation-drain-port-design.md` in the issue dir.
 
 ## Latest RabbitMQ (4.2 main) is still affected — verified in source 2026-07-09
 

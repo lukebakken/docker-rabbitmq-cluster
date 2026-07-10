@@ -301,12 +301,23 @@ restart_node() {
         node)
             docker compose restart "$node" >&2
             ;;
+        kill)
+            # Ungraceful: SIGKILL the beam with no grace period, so RabbitMQ's
+            # SIGTERM handler never runs and federation links are NOT disconnected
+            # on the way down. This is the only mode that leaves the owner's
+            # roster rows pointing at a now-dead pid -- the true #11495 strand
+            # precondition. drain and 'node' (SIGTERM + grace) both shed links
+            # cleanly before the node stops, so neither exercises it.
+            docker compose kill -s KILL "$node" >&2
+            docker compose start "$node" >&2
+            wait_healthy
+            ;;
         app)
             docker compose exec -T "$node" rabbitmqctl --quiet stop_app >&2
             docker compose exec -T "$node" rabbitmqctl --quiet start_app >&2
             ;;
         *)
-            echo "restart_node: unknown RESTART_MODE '$restart_mode' (want drain|node|app)" >&2
+            echo "restart_node: unknown RESTART_MODE '$restart_mode' (want drain|node|kill|app)" >&2
             return 1
             ;;
     esac
