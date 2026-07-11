@@ -1,14 +1,15 @@
-ARG RABBITMQ_DOCKER_TAG=rabbitmq:4-management
+ARG RABBITMQ_DOCKER_TAG=rabbitmq:4.3-management-amazonlinux
 
 FROM ${RABBITMQ_DOCKER_TAG}
 
 # ENV LOG=debug RABBITMQ_FEATURE_FLAGS=khepri_db
 ENV RABBITMQ_FEATURE_FLAGS=khepri_db
 
+# Amazon Linux 2023 base: dnf, not apt-get. curl is already provided by
+# curl-minimal (installing full curl conflicts), so it is omitted here.
 RUN set -eux; \
-    export DEBIAN_FRONTEND=noninteractive; \
-    apt-get update; \
-    apt-get install --yes --no-install-recommends curl tcpdump net-tools iproute2 iputils-ping dnsutils ldnsutils
+    dnf install -y tcpdump net-tools iproute iputils bind-utils ldns-utils; \
+    dnf clean all
 
 COPY --chown=rabbitmq:rabbitmq --chmod=0400 erlang.cookie /var/lib/rabbitmq/.erlang.cookie
 COPY --chown=rabbitmq:rabbitmq enabled_plugins /etc/rabbitmq/
