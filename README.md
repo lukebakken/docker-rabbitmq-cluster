@@ -12,41 +12,19 @@ make clean
 
 ## Failure-detector experiment
 
-This cluster ships with `aten`, the adaptive failure detector RabbitMQ uses
-under Ra. `aten` heartbeats every connected node every 100ms and tracks each
-peer's heartbeat inter-arrival times; `aten_sink:get_failure_probabilities/0`
-returns a map of `peer -> probability` (0.0 healthy .. 1.0 considered down).
-
-The experiment injects packet loss on a single node and captures those
-probabilities on all three nodes, to see whether a faulty node stands out to
-its healthy peers early enough and clearly enough to attribute the fault.
-
-Loss is injected egress-only on the faulty node. Dropping its outbound
-heartbeats makes both healthy peers see it as failing while they still see
-each other cleanly. That asymmetry (the "one mutually-clean pair" at three
-nodes) is the attribution signal under test. Inject loss while the cluster is
-under mirrored-queue sync load, since heavy distribution traffic can mask the
-asymmetry.
-
-Requires `NET_ADMIN` (already granted in `docker-compose.yml`) and `tc`
-(installed in the image via `iproute2`).
+Injects packet loss on cluster nodes and captures `aten` per-node failure probabilities to test whether a single faulty node can be attributed from its healthy peers. Requires `NET_ADMIN` (granted in `docker-compose.yml`) and `tc` (installed via `iproute2`).
 
 ```
-# Bring the cluster up (perf-test load starts automatically).
-make up
-
-# In another shell, start capturing probabilities from all nodes.
-make capture SECS=600 INTERVAL=1
-
-# In another shell, inject periodic loss on one node.
-make inject-periodic NODE=rmq0 LOSS=48 ON=5 OFF=10
-
-# Or apply steady loss instead of periodic bursts.
-make inject NODE=rmq0 LOSS=48
-
-# Stop injecting and restore clean networking.
-make clear NODE=rmq0
+make up                                              # cluster + perf-test load
+make capture SECS=240 INTERVAL=1                     # poll aten on all nodes -> out/
+make inject-periodic NODE=rmq0 LOSS=48 ON=5 OFF=10   # periodic egress loss on one node
+make clear NODE=rmq0                                 # restore clean networking
 ```
 
-Capture output lands in `out/aten-capture.log`, one timestamped line per
-observer node per sample.
+Findings in brief:
+
+- With one faulty node and no other congestion, the two healthy nodes' view of each other stays at 0.000 while both peg the faulty node near 1.0: attribution is clean and early, and the probability flaps with the loss duty cycle (so use flap-rate or time-above-threshold, not an instantaneous 0.99).
+- Under cluster-wide loss the faulty node still ranks highest from both peers by a wide margin, but the clean pair is no longer 0.000 and the busiest node reads elevated even with no fault: attribution must be comparative with a margin, never an absolute cutoff.
+- Under `ha-mode: all` with persistent messages, sustained loss can OOM-kill a node (backlog fills memory to the 8 GB container limit); keep messages small or loss moderate.
+
+Full methodology and results: [docs/aten-experiment.md](docs/aten-experiment.md).
