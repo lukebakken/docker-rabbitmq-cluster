@@ -8,6 +8,10 @@ x-rmq-common: &common-config
     - rabbitnet
   build: rmq
   mem_limit: 8gb
+  # NET_ADMIN lets tc/netem apply a qdisc on the node's interface from
+  # inside the container, to inject packet loss during the experiment.
+  cap_add:
+    - NET_ADMIN
   ulimits:
     nofile:
       soft: 65536

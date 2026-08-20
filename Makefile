@@ -1,7 +1,15 @@
-.PHONY: clean down up perms rmq-perms enable-ff
+.PHONY: clean down up perms rmq-perms enable-ff inject inject-periodic clear capture
 
 DOCKER_FRESH ?= false
 RABBITMQ_DOCKER_TAG ?= rabbitmq:3.13.7-management
+
+# Failure-detector experiment knobs (see README).
+NODE ?= rmq0
+LOSS ?= 48
+ON ?= 5
+OFF ?= 10
+SECS ?= 600
+INTERVAL ?= 1
 
 clean: perms
 	git clean -xffd
@@ -26,3 +34,15 @@ rmq-perms:
 
 enable-ff:
 	docker compose exec rmq0 rabbitmqctl enable_feature_flag all
+
+inject:
+	./netem/loss.sh $(NODE) $(LOSS)
+
+inject-periodic:
+	./netem/loss-periodic.sh $(NODE) $(LOSS) $(ON) $(OFF)
+
+clear:
+	./netem/clear.sh $(NODE)
+
+capture:
+	./netem/capture-aten.sh $(SECS) $(INTERVAL)
