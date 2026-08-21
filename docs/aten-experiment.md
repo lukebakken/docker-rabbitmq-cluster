@@ -13,7 +13,7 @@ This matters because `aten` is per-node, real-time, packet-loss-sensitive, and a
 - `aten_emitter` sends a heartbeat to every connected node (`nodes()`) every 100ms, unconditionally. It does not require any `ra`/quorum-queue registration, so on a running cluster every node has heartbeat data for every peer even with no quorum queues in use.
 - `aten_sink` records per-peer heartbeat inter-arrival samples and exposes `get_failure_probabilities/0`, returning `#{peer => probability}`.
 - `aten_detect` computes the probability from the samples; `aten_detector` polls once per second and fires `{node_event, Node, up | down}` at a probability threshold of 0.99. Only those up/down events reach `ra`; the continuous probability is not surfaced anywhere by default.
-- The heartbeats travel over the Erlang distribution channel, so interface-level packet loss degrades exactly the signal `aten` measures.
+- The heartbeats travel over the Erlang distribution channel, which is **TCP**. So interface-level packet loss does not *drop* heartbeats - TCP retransmits them, so they arrive **delayed and jittery** (head-of-line blocking stalls the stream until the retransmit). What `aten` measures is therefore increased inter-arrival **latency/jitter**, not missing heartbeats, and its probability is a **relative/change** measure of that latency - which means it **re-normalises** a sustained loss (the elevated latency becomes the new baseline). This is central to the durability findings below.
 
 The directed nature of the data is important: `observer -> peer` probability is driven by the heartbeats arriving at `observer` from `peer`, i.e. by `peer`'s outbound path (plus `observer`'s inbound path). Egress loss on one node therefore shows up in that node's peers' view of it.
 
@@ -47,7 +47,7 @@ Result (attribution is clean and early):
 - The faulty node's own view of its peers stayed low (mean around 0.056), as expected for egress-only loss.
 - `ra` corroboration: the healthy nodes logged quorum-queue pre-vote timeouts naming the faulty node as possibly down, i.e. `aten`'s down events propagating into `ra`.
 
-Detector implication: the right signal is time-above-a-low-threshold or flap-rate, not an instantaneous probability of 0.99 (which is absent roughly 60% of the time under periodic loss).
+Detector implication: the right signal is **flap-rate** (upward crossings of the extreme threshold per window), not an instantaneous probability of 0.99 (absent ~60% of the time) and not time-above-a-threshold. A later live-broker test (see the follow-up section) showed time-above-threshold **starves**: because aten re-normalises, the suspect sat above 0.5 only ~13% of the window despite spiking to ~1.0 on every burst, so a fraction-of-time measure never crossed - whereas each burst still produces a fresh upward crossing.
 
 ## Experiment 2: cluster-wide congestion (masking)
 
@@ -72,6 +72,16 @@ Detector implication: attribution must be comparative (compare nodes against eac
 ## Operational finding: cluster-wide loss can OOM a node
 
 During the heavier-loss runs, a node's `beam.smp` was killed by the kernel cgroup OOM-killer at roughly 8 GB anon-rss, against the container's 8 GB `mem_limit`. Under packet loss on an `ha-mode: all` cluster with persistent messages, delivery and acknowledgements stall while publishers keep filling the mirrored queues, so message backlog accumulates in memory until `beam` exceeds the limit and is killed. Docker Compose then replaces the dead container with a fresh one, so the replacement shows `OOMKilled=false` and `RestartCount=0`; the OOM is only visible in the kernel log (`dmesg`) and on the now-removed container. Gentler loss with smaller messages avoided it (all three nodes survived Experiment 2's clean run).
+
+## Follow-up: live-broker and in-vivo findings
+
+The experiments above analysed captured probability samples. Building the detector into the plugin and running it live refined the design and answered the durability question:
+
+- **Flap-rate redesign.** Loading the built detector into a running broker under periodic loss, the original "time-above-a-low-threshold" trigger never fired - re-normalisation kept the suspect above 0.5 only ~13% of the window even though it spiked to ~1.0 on every burst. The isolated-fault path was changed to trigger on **flap count** (upward crossings of the extreme threshold) instead, which each burst reliably increments.
+
+- **In-vivo validation on a real cluster (real network, not loopback).** Periodic 48% loss (5s on / 10s off - the realistic intermittent-drop pattern) fires within ~20s and **holds** the verdict durably for the whole window, recovering to clean after the fault ends, with the default window and flap-min. Continuous 48% loss fires but then **fades** after ~40s while the node is still degraded - the re-normalisation, now confirmed on real infrastructure rather than a loopback artifact.
+
+- **Continuous-loss durability needs a level signal.** Because aten's probability is a change signal, sustained-constant loss escapes it. A measurement confirmed the durable alternative: the **TCP retransmit counter** on the inter-node distribution socket (`ss -tino`, `bytes_retrans`/`retrans`) climbs continuously through the loss and freezes the instant it clears - a non-adaptive level signal, measured on the faulty node (which retransmits its dropped egress sends). aten's raw inter-arrival samples would also serve, but they live in a private, version-specific internal record (only the re-normalising probability is public), so a detector should prefer TCP retransmit rate or a self-computed inter-arrival jitter over coupling to aten internals. In practice, real gray-network faults are bursty (not perfectly constant), so the flap-rate signal plus onset-latching alarms cover most cases; the level signal is the belt-and-suspenders for a truly continuous fault.
 
 ## Reproducing
 
