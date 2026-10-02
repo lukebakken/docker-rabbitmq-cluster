@@ -822,6 +822,7 @@ send_reject_publish(#delivery{confirm = true,
                                   backing_queue = BQ,
                                   backing_queue_state = BQS,
                                   msg_id_to_channel   = MTC}) ->
+    %% Drop publish and nack to publisher
     MsgId = mc:get_annotation(id, Msg),
     ok = rabbit_classic_queue:send_rejection(SenderPid,
                                              amqqueue:get_name(Q), MsgSeqNo),
@@ -829,9 +830,19 @@ send_reject_publish(#delivery{confirm = true,
     MTC1 = maps:remove(MsgId, MTC),
     BQS1 = BQ:discard(MsgId, SenderPid, Flow, BQS),
     State#q{ backing_queue_state = BQS1, msg_id_to_channel = MTC1 };
-send_reject_publish(#delivery{confirm = false},
-                      _Delivered, State) ->
-    State.
+send_reject_publish(#delivery{confirm = false,
+                              sender = SenderPid,
+                              flow = Flow,
+                              message = Msg},
+                    _Delivered,
+                    State = #q{backing_queue = BQ,
+                               backing_queue_state = BQS,
+                               msg_id_to_channel = MTC}) ->
+    %% Only drop publish
+    MsgId = mc:get_annotation(id, Msg),
+    MTC1 = maps:remove(MsgId, MTC),
+    BQS1 = BQ:discard(MsgId, SenderPid, Flow, BQS),
+    State#q{ backing_queue_state = BQS1, msg_id_to_channel = MTC1 }.
 
 will_overflow(_, #q{max_length = undefined,
                     max_bytes  = undefined}) -> false;
