@@ -705,51 +705,73 @@ attempt_delivery(Delivery = #delivery{sender  = SenderPid,
 
 maybe_deliver_or_enqueue(Delivery = #delivery{message = Message},
                          Delivered,
-                         State = #q{overflow            = Overflow,
-                                    backing_queue       = BQ,
-                                    backing_queue_state = BQS,
-                                    dlx                 = DLX,
-                                    dlx_routing_key     = RK}) ->
+                         State = #q{backing_queue       = rabbit_mirror_queue_master = BQ,
+                                    backing_queue_state = BQS}) ->
     send_mandatory(Delivery), %% must do this before confirms
-    %% Check for a duplicate before checking for overflow. A newly promoted
-    %% mirrored queue leader can receive a channel's copy of a message it
-    %% already has via GM; that copy must be dropped as a duplicate even when
-    %% the queue is full, because rejecting it would nack a message that was
-    %% enqueued and would fail the seen_status assertion in
+    %% A newly promoted leader can receive a channel's copy of a message whose
+    %% publish or discard it already saw via GM, so it is still in seen_status.
+    %% Drop it even when the queue is full: rejecting it would call
+    %% BQ:discard/4, which fails the seen_status assertion in
     %% rabbit_mirror_queue_master:discard/4.
     {IsDuplicate, BQS1} = BQ:is_duplicate(Message, BQS),
     State1 = State#q{backing_queue_state = BQS1},
     case IsDuplicate of
-        true -> State1;
-        {true, drop} -> State1;
-        %% Drop publish and nack to publisher
-        {true, reject} ->
-            send_reject_publish(Delivery, Delivered, State1);
-        false ->
-            case {will_overflow(Delivery, State1), Overflow} of
-                {true, 'reject-publish'} ->
-                    %% Drop publish and nack to publisher
-                    send_reject_publish(Delivery, Delivered, State1);
-                {true, 'reject-publish-dlx'} ->
-                    %% Publish to DLX
-                    _ = with_dlx(
-                      DLX,
-                      fun (X) ->
-                              rabbit_global_counters:messages_dead_lettered(maxlen, rabbit_classic_queue,
-                                                                            at_most_once, 1),
-                              QName = qname(State1),
-                              rabbit_dead_letter:publish(Message, maxlen, X, RK, QName)
-                      end,
-                      fun () -> rabbit_global_counters:messages_dead_lettered(maxlen, rabbit_classic_queue,
-                                                                              disabled, 1)
-                      end),
-                    %% Drop publish and nack to publisher
-                    send_reject_publish(Delivery, Delivered, State1);
+        false -> maybe_reject_or_enqueue(Delivery, Delivered, false, State1);
+        _     -> handle_duplicate(IsDuplicate, Delivery, Delivered, State1)
+    end;
+maybe_deliver_or_enqueue(Delivery, Delivered, State) ->
+    send_mandatory(Delivery), %% must do this before confirms
+    maybe_reject_or_enqueue(Delivery, Delivered, unchecked, State).
+
+maybe_reject_or_enqueue(Delivery = #delivery{message = Message},
+                        Delivered,
+                        DuplicateCheck,
+                        State = #q{overflow            = Overflow,
+                                   backing_queue       = BQ,
+                                   backing_queue_state = BQS,
+                                   dlx                 = DLX,
+                                   dlx_routing_key     = RK}) ->
+    case {will_overflow(Delivery, State), Overflow} of
+        {true, 'reject-publish'} ->
+            %% Drop publish, and nack it if the publisher uses confirms
+            send_reject_publish(Delivery, Delivered, State);
+        {true, 'reject-publish-dlx'} ->
+            %% Publish to DLX
+            _ = with_dlx(
+              DLX,
+              fun (X) ->
+                      rabbit_global_counters:messages_dead_lettered(maxlen, rabbit_classic_queue,
+                                                                    at_most_once, 1),
+                      QName = qname(State),
+                      rabbit_dead_letter:publish(Message, maxlen, X, RK, QName)
+              end,
+              fun () -> rabbit_global_counters:messages_dead_lettered(maxlen, rabbit_classic_queue,
+                                                                      disabled, 1)
+              end),
+            %% Drop publish, and nack it if the publisher uses confirms
+            send_reject_publish(Delivery, Delivered, State);
+        _ when DuplicateCheck =:= false ->
+            %% Enqueue and maybe drop head later
+            deliver_or_enqueue(Delivery, Delivered, State);
+        _ ->
+            {IsDuplicate, BQS1} = BQ:is_duplicate(Message, BQS),
+            State1 = State#q{backing_queue_state = BQS1},
+            case IsDuplicate of
+                %% Enqueue and maybe drop head later
+                false ->
+                    deliver_or_enqueue(Delivery, Delivered, State1);
                 _ ->
-                    %% Enqueue and maybe drop head later
-                    deliver_or_enqueue(Delivery, Delivered, State1)
+                    handle_duplicate(IsDuplicate, Delivery, Delivered, State1)
             end
     end.
+
+handle_duplicate(true, _Delivery, _Delivered, State) ->
+    State;
+handle_duplicate({true, drop}, _Delivery, _Delivered, State) ->
+    State;
+handle_duplicate({true, reject}, Delivery, Delivered, State) ->
+    %% Drop publish, and nack it if the publisher uses confirms
+    send_reject_publish(Delivery, Delivered, State).
 
 deliver_or_enqueue(Delivery = #delivery{message = Message,
                                         sender  = SenderPid,
