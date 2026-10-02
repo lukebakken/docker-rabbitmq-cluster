@@ -716,8 +716,19 @@ maybe_deliver_or_enqueue(Delivery = #delivery{message = Message},
     {IsDuplicate, BQS1} = BQ:is_duplicate(Message, BQS),
     State1 = State#q{backing_queue_state = BQS1},
     case IsDuplicate of
-        false -> maybe_reject_or_enqueue(Delivery, Delivered, false, State1);
-        _     -> handle_duplicate(IsDuplicate, Delivery, Delivered, State1)
+        false ->
+            maybe_reject_or_enqueue(Delivery, Delivered, false, State1);
+        {true, reject} ->
+            handle_duplicate(IsDuplicate, Delivery, Delivered, State1);
+        _ ->
+            %% rabbit_mirror_queue_master settles a dropped duplicate's
+            %% confirm through msg_id_to_channel, so record it (or send it,
+            %% for a transient message) before dropping, as was done before
+            %% is_duplicate moved ahead of send_or_record_confirm in 3.8.0.
+            %% Without this a publisher using confirms never hears about the
+            %% message.
+            {_Confirm, State2} = send_or_record_confirm(Delivery, State1),
+            handle_duplicate(IsDuplicate, Delivery, Delivered, State2)
     end;
 maybe_deliver_or_enqueue(Delivery, Delivered, State) ->
     send_mandatory(Delivery), %% must do this before confirms
