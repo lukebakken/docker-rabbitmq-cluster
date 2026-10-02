@@ -44,56 +44,71 @@ services:
       # HOST:CONTAINER
       - 8874:15672
       - 15694:15692
-  perf-test:
+  # Declares cmq-repro from a connection to rmq0, so with the default client-local leader
+  # locator the queue's leader is on rmq0 and its mirrors are on rmq1 and rmq2.
+  publisher-noconfirm:
     image: pivotalrabbitmq/perf-test:latest
     networks:
       - rabbitnet
     command:
-      - --uri=amqp://haproxy
-      - --servers-startup-timeout=45
-      - --rate=100
-      - --producers=5
-      - --consumers=5
-      - --confirm=32
-      - --confirm-timeout=800
-      - --flag=mandatory
+      - --uri=amqp://rmq0
+      - --servers-startup-timeout=60
+      - --id=noconfirm
+      - --producers=1
+      - --consumers=0
+      - --rate=200
+      - --size=16384
       - --flag=persistent
-      - --queue-args=x-queue-type=classic
+      - --queue=cmq-repro
       - --auto-delete=false
-      - --queue-pattern=perf-test-%03d
-      - --queue-pattern-from=0
-      - --queue-pattern-to=4
     depends_on:
       - rmq0
       - rmq1
       - rmq2
-      - haproxy
     restart: on-failure
-  perf-test-qq:
+  # Consumes more slowly than the publisher publishes, so cmq-repro stays at its max-length
+  # and the leader keeps rejecting publishes.
+  consumer:
     image: pivotalrabbitmq/perf-test:latest
     networks:
       - rabbitnet
     command:
-      - --uri=amqp://haproxy
-      - --servers-startup-timeout=45
-      - --rate=100
-      - --producers=5
-      - --consumers=5
-      - --confirm=32
-      - --confirm-timeout=800
-      - --flag=mandatory
-      - --flag=persistent
-      - --queue-args=x-queue-type=classic
+      - --uri=amqp://rmq0
+      - --servers-startup-timeout=60
+      - --id=consumer
+      - --producers=0
+      - --consumers=1
+      - --consumer-rate=100
+      - --queue=cmq-repro
       - --auto-delete=false
-      - --queue-pattern=perf-test-qq-%03d
-      - --queue-pattern-from=0
-      - --queue-pattern-to=4
-      - --quorum-queue
     depends_on:
       - rmq0
       - rmq1
       - rmq2
-      - haproxy
+    restart: on-failure
+  # Control: the same load with publisher confirms. Start with `--profile confirm`.
+  publisher-confirm:
+    image: pivotalrabbitmq/perf-test:latest
+    profiles:
+      - confirm
+    networks:
+      - rabbitnet
+    command:
+      - --uri=amqp://rmq0
+      - --servers-startup-timeout=60
+      - --id=confirm
+      - --producers=1
+      - --consumers=0
+      - --rate=200
+      - --size=16384
+      - --flag=persistent
+      - --confirm=32
+      - --queue=cmq-repro
+      - --auto-delete=false
+    depends_on:
+      - rmq0
+      - rmq1
+      - rmq2
     restart: on-failure
   haproxy:
     image: haproxy:latest

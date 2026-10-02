@@ -1,7 +1,8 @@
-.PHONY: clean down up perms rmq-perms enable-ff
+.PHONY: clean down up perms rmq-perms enable-ff watch stop-noconfirm
 
 DOCKER_FRESH ?= false
 RABBITMQ_DOCKER_TAG ?= rabbitmq:3.13.7-management
+CMQ_FIX ?= false
 
 clean: perms
 	git clean -xffd
@@ -11,10 +12,10 @@ down:
 
 up: rmq-perms
 ifeq ($(DOCKER_FRESH),true)
-	docker compose build --no-cache --pull --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
+	docker compose build --no-cache --pull --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG) --build-arg CMQ_FIX=$(CMQ_FIX)
 	docker compose up --pull always
 else
-	docker compose build --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG)
+	docker compose build --build-arg RABBITMQ_DOCKER_TAG=$(RABBITMQ_DOCKER_TAG) --build-arg CMQ_FIX=$(CMQ_FIX)
 	docker compose up
 endif
 
@@ -26,3 +27,9 @@ rmq-perms:
 
 enable-ff:
 	docker compose exec rmq0 rabbitmqctl enable_feature_flag all
+
+watch:
+	./scripts/watch-mirrors.sh
+
+stop-noconfirm:
+	docker compose stop publisher-noconfirm

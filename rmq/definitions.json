@@ -35,18 +35,49 @@
     }
   ],
   "topic_permissions": [],
-  "parameters": [],
+  "parameters": [
+    {
+      "vhost": "/",
+      "component": "operator_policy",
+      "name": "operator-policy",
+      "value": {
+        "pattern": ".*",
+        "apply-to": "classic_queues",
+        "definition": {
+          "ha-mode": "all",
+          "ha-sync-mode": "automatic",
+          "queue-version": 2
+        },
+        "priority": 0
+      }
+    }
+  ],
   "global_parameters": [],
   "policies": [
     {
       "vhost": "/",
-      "name": "ha-all-the-things",
+      "name": "ha-all",
       "pattern": ".*",
-      "apply-to": "queues",
+      "apply-to": "classic_queues",
       "definition": {
-        "ha-mode": "all"
+        "ha-mode": "all",
+        "ha-sync-mode": "automatic"
       },
       "priority": 0
+    },
+    {
+      "vhost": "/",
+      "name": "classic-queue-limits",
+      "pattern": ".*",
+      "apply-to": "classic_queues",
+      "definition": {
+        "ha-mode": "all",
+        "ha-sync-mode": "automatic",
+        "max-length": 1000,
+        "overflow": "reject-publish",
+        "queue-mode": "lazy"
+      },
+      "priority": 1
     }
   ],
   "queues": [],
