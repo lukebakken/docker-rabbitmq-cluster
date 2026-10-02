@@ -79,6 +79,7 @@ services:
       - --producers=0
       - --consumers=1
       - --consumer-rate=100
+      - --flag=persistent
       - --queue=cmq-repro
       - --auto-delete=false
     depends_on:

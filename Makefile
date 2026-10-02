@@ -1,4 +1,4 @@
-.PHONY: clean down up perms rmq-perms enable-ff watch stop-noconfirm
+.PHONY: clean down up perms rmq-perms enable-ff watch stop-noconfirm reset-queue
 
 DOCKER_FRESH ?= false
 RABBITMQ_DOCKER_TAG ?= rabbitmq:3.13.7-management
@@ -33,3 +33,10 @@ watch:
 
 stop-noconfirm:
 	docker compose stop publisher-noconfirm
+
+# After the cluster restarts, cmq-repro's record still names its previous mirror processes,
+# which are dead, so the queue runs unmirrored and cannot reproduce anything. Delete it and let
+# the clients redeclare it.
+reset-queue:
+	docker compose stop publisher-noconfirm publisher-confirm consumer
+	docker compose exec rmq0 rabbitmqctl delete_queue cmq-repro

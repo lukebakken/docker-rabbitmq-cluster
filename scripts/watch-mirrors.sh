@@ -14,13 +14,24 @@ set -o pipefail
 declare -ri interval="${1:-10}"
 declare -ra nodes=(rmq0 rmq1 rmq2)
 
-# `sender_queues` is element 8 of rabbit_mirror_queue_slave's #state{} record in 3.13.7.
+# gen_server2 does not implement system_get_state/1, so sys:get_state/1 returns its whole
+# #gs2_state{} record, whose element 4 is the module state. `sender_queues` is element 8 of the
+# #state{} record in rabbit_mirror_queue_slave in 3.13.7. The matches fail loudly if either
+# shape changes.
 declare -r erl_expr='
 Me = node(),
 Mirrors = [P || Q <- rabbit_amqqueue:list(<<"/">>),
                 P <- case amqqueue:get_slave_pids(Q) of L when is_list(L) -> L; _ -> [] end,
                 node(P) =:= Me],
-Held = lists:sum([lists:sum([queue:len(MQ) || {MQ, _, _} <- maps:values(element(8, sys:get_state(P)))])
+SenderQueues = fun(P) ->
+                   GS = sys:get_state(P),
+                   gs2_state = element(1, GS),
+                   rabbit_mirror_queue_slave = element(5, GS),
+                   St = element(4, GS),
+                   state = element(1, St),
+                   element(8, St)
+               end,
+Held = lists:sum([lists:sum([queue:len(MQ) || {MQ, _, _} <- maps:values(SenderQueues(P))])
                   || P <- Mirrors]),
 Bin = lists:sum([Sz || P <- Mirrors, {binary, B} <- [erlang:process_info(P, binary)], {_, Sz, _} <- B]),
 io:format("~s total_mb=~b binary_mb=~b mirrors=~b held_msgs=~b mirror_binary_mb=~b~n",
