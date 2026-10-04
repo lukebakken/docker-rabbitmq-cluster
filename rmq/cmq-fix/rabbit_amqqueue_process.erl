@@ -705,32 +705,32 @@ attempt_delivery(Delivery = #delivery{sender  = SenderPid,
 
 maybe_deliver_or_enqueue(Delivery = #delivery{message = Message},
                          Delivered,
-                         State = #q{backing_queue       = rabbit_mirror_queue_master = BQ,
+                         State = #q{backing_queue       = rabbit_mirror_queue_master,
                                     backing_queue_state = BQS}) ->
-    send_mandatory(Delivery), %% must do this before confirms
-    %% A newly promoted leader can receive a channel's copy of a message whose
-    %% publish or discard it already saw via GM, so it is still in seen_status.
-    %% Drop it even when the queue is full: rejecting it would call
-    %% BQ:discard/4, which fails the seen_status assertion in
-    %% rabbit_mirror_queue_master:discard/4.
-    {IsDuplicate, BQS1} = BQ:is_duplicate(Message, BQS),
-    State1 = State#q{backing_queue_state = BQS1},
-    case IsDuplicate of
-        false -> maybe_reject_or_enqueue(Delivery, Delivered, false, State1);
-        _     -> handle_duplicate(IsDuplicate, Delivery, Delivered, State1)
+    %% A promoted leader can receive a channel's copy of a message that
+    %% is in its seen_status because it arrived via GM first. Look it up
+    %% before the overflow check: rejecting such a copy can call
+    %% BQ:discard/4, whose seen_status assertion crashes the queue
+    %% process.
+    case rabbit_mirror_queue_master:is_seen(Message, BQS) of
+        {false, BQS1} ->
+            maybe_reject_or_enqueue(Delivery, Delivered,
+                                    State#q{backing_queue_state = BQS1});
+        {Seen, BQS1} ->
+            send_mandatory(Delivery), %% must do this before confirms
+            settle_seen(Seen, Delivery, State#q{backing_queue_state = BQS1})
     end;
 maybe_deliver_or_enqueue(Delivery, Delivered, State) ->
-    send_mandatory(Delivery), %% must do this before confirms
-    maybe_reject_or_enqueue(Delivery, Delivered, unchecked, State).
+    maybe_reject_or_enqueue(Delivery, Delivered, State).
 
 maybe_reject_or_enqueue(Delivery = #delivery{message = Message},
                         Delivered,
-                        DuplicateCheck,
                         State = #q{overflow            = Overflow,
                                    backing_queue       = BQ,
                                    backing_queue_state = BQS,
                                    dlx                 = DLX,
                                    dlx_routing_key     = RK}) ->
+    send_mandatory(Delivery), %% must do this before confirms
     case {will_overflow(Delivery, State), Overflow} of
         {true, 'reject-publish'} ->
             %% Drop publish, and nack it if the publisher uses confirms
@@ -750,47 +750,57 @@ maybe_reject_or_enqueue(Delivery = #delivery{message = Message},
               end),
             %% Drop publish, and nack it if the publisher uses confirms
             send_reject_publish(Delivery, Delivered, State);
-        _ when DuplicateCheck =:= false ->
-            %% Enqueue and maybe drop head later
-            deliver_or_enqueue(Delivery, Delivered, State);
         _ ->
             {IsDuplicate, BQS1} = BQ:is_duplicate(Message, BQS),
             State1 = State#q{backing_queue_state = BQS1},
             case IsDuplicate of
+                true -> State1;
+                {true, drop} -> State1;
+                %% Drop publish, and nack it if the publisher uses confirms
+                {true, reject} ->
+                    send_reject_publish(Delivery, Delivered, State1);
                 %% Enqueue and maybe drop head later
                 false ->
-                    deliver_or_enqueue(Delivery, Delivered, State1);
-                _ ->
-                    handle_duplicate(IsDuplicate, Delivery, Delivered, State1)
+                    deliver_or_enqueue(Delivery, Delivered, State1)
             end
     end.
 
-handle_duplicate(true, _Delivery, _Delivered, State) ->
-    State;
-handle_duplicate({true, drop}, _Delivery, _Delivered, State) ->
-    State;
-handle_duplicate({true, reject}, Delivery, Delivered, State) ->
-    %% Drop publish, and nack it if the publisher uses confirms
-    send_reject_publish(Delivery, Delivered, State);
-%% {true, confirm} and {true, nack} come only from rabbit_mirror_queue_master,
-%% for a channel's copy of a message a promoted leader saw via GM as a mirror.
-handle_duplicate({true, confirm}, Delivery, _Delivered, State) ->
-    %% The message is in the queue: confirm it now (transient message or
-    %% non-durable queue) or when drain_confirmed/1 returns it.
+settle_seen({true, confirm}, Delivery, State) ->
+    %% The previous leader enqueued the message.
     {_Confirm, State1} = send_or_record_confirm(Delivery, State),
     State1;
-handle_duplicate({true, nack}, Delivery, _Delivered, State) ->
-    %% The previous leader discarded the message, possibly by rejecting it,
-    %% so nack it rather than risk confirming a message that is in no queue.
-    nack_duplicate(Delivery, State).
+settle_seen({true, discarded}, Delivery, State) ->
+    %% If this queue rejects publishes for overflow, the previous leader
+    %% may have discarded the message by rejecting it, and its nack may
+    %% have been lost with its node: nack it, so that at worst the
+    %% publisher sends it again. Otherwise the previous leader did not
+    %% reject it for overflow, so confirm it. The underlying BQ never
+    %% confirms a discarded message, so neither is recorded.
+    case can_reject(State) of
+        true  -> reject_seen(Delivery, State);
+        false -> confirm_seen(Delivery, State)
+    end.
 
-nack_duplicate(#delivery{confirm    = true,
-                         sender     = SenderPid,
-                         msg_seq_no = MsgSeqNo}, State = #q{q = Q}) ->
+can_reject(#q{max_length = undefined, max_bytes = undefined}) ->
+    false;
+can_reject(#q{overflow = Overflow}) ->
+    Overflow =:= 'reject-publish' orelse Overflow =:= 'reject-publish-dlx'.
+
+reject_seen(#delivery{confirm    = true,
+                      sender     = SenderPid,
+                      msg_seq_no = MsgSeqNo}, State = #q{q = Q}) ->
     ok = rabbit_classic_queue:send_rejection(SenderPid, amqqueue:get_name(Q),
                                              MsgSeqNo),
     State;
-nack_duplicate(#delivery{confirm = false}, State) ->
+reject_seen(#delivery{confirm = false}, State) ->
+    State.
+
+confirm_seen(#delivery{confirm    = true,
+                       sender     = SenderPid,
+                       msg_seq_no = MsgSeqNo}, State = #q{q = Q}) ->
+    confirm_to_sender(SenderPid, amqqueue:get_name(Q), [MsgSeqNo]),
+    State;
+confirm_seen(#delivery{confirm = false}, State) ->
     State.
 
 deliver_or_enqueue(Delivery = #delivery{message = Message,

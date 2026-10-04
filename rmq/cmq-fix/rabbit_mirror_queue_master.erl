@@ -24,6 +24,8 @@
 
 -export([init_with_existing_bq/3, stop_mirroring/1, sync_mirrors/3]).
 
+-export([is_seen/2]).
+
 -behaviour(rabbit_backing_queue).
 
 -include("amqqueue.hrl").
@@ -473,32 +475,42 @@ invoke(Mod, Fun, State = #state { backing_queue       = BQ,
                                   backing_queue_state = BQS }) ->
     State #state { backing_queue_state = BQ:invoke(Mod, Fun, BQS) }.
 
-is_duplicate(Message,
-             State = #state { seen_status         = SS,
-                              backing_queue       = BQ,
-                              backing_queue_state = BQS,
-                              confirmed           = Confirmed }) ->
+is_duplicate(Message, State = #state { backing_queue       = BQ,
+                                       backing_queue_state = BQS }) ->
+    case is_seen(Message, State) of
+        {false, State1} ->
+            %% We permit the underlying BQ to have a peek at it, but
+            %% only if we ourselves are not filtering out the msg.
+            {Result, BQS1} = BQ:is_duplicate(Message, BQS),
+            {Result, State1 #state { backing_queue_state = BQS1 }};
+        Seen ->
+            Seen
+    end.
+
+%% The seen_status half of is_duplicate/2, without consulting the
+%% underlying BQ. rabbit_amqqueue_process calls it before its overflow
+%% check.
+is_seen(Message, State = #state { seen_status = SS,
+                                  confirmed   = Confirmed }) ->
     MsgId = mc:get_annotation(id, Message),
     %% Here, we need to deal with the possibility that we're about to
     %% receive a message that we've already seen when we were a mirror
-    %% (we received it via gm). Such a message is a duplicate, and the
-    %% verdict tells rabbit_amqqueue_process how to settle it: {true,
-    %% confirm} for one that is in the queue, {true, nack} for one that
-    %% the previous leader discarded, which it may have done by rejecting
-    %% it.
+    %% (we received it via gm). The verdict tells rabbit_amqqueue_process
+    %% how to settle the channel's copy: {true, confirm} if the message
+    %% was published, {true, discarded} if it was discarded.
 
     %% We will never see {published, ChPid, MsgSeqNo} here.
     case maps:find(MsgId, SS) of
         error ->
-            %% We permit the underlying BQ to have a peek at it, but
-            %% only if we ourselves are not filtering out the msg.
-            {Result, BQS1} = BQ:is_duplicate(Message, BQS),
-            {Result, State #state { backing_queue_state = BQS1 }};
+            {false, State};
         {ok, published} ->
             %% It already got published when we were a mirror and no
-            %% confirmation is waiting. rabbit_amqqueue_process records
-            %% the confirm in msg_id_to_channel, and drain_confirmed/1
-            %% returns the MsgId when the BQ confirms the message.
+            %% confirmation is waiting. rabbit_amqqueue_process confirms
+            %% it at once (transient message or non-durable queue) or
+            %% records it in msg_id_to_channel, and drain_confirmed/1
+            %% returns the MsgId when the underlying BQ confirms the
+            %% message. We will not be further involved in confirming
+            %% this message, so erase.
             {{true, confirm}, State #state { seen_status = maps:remove(MsgId, SS) }};
         {ok, confirmed} ->
             %% It got published when we were a mirror via gm, and
@@ -506,14 +518,16 @@ is_duplicate(Message,
             %% promotion), but before we received the publish from the
             %% channel, so couldn't previously know what the
             %% msg_seq_no was (and thus confirm as a mirror). So we
-            %% need to confirm now: rabbit_amqqueue_process records the
-            %% confirm in msg_id_to_channel, and the next
-            %% drain_confirmed/1 returns the MsgId.
+            %% need to confirm now. rabbit_amqqueue_process confirms it
+            %% at once or records it in msg_id_to_channel, and the next
+            %% drain_confirmed/1 returns the MsgId for a recorded one.
             {{true, confirm}, State #state { seen_status = maps:remove(MsgId, SS),
                                              confirmed = [MsgId | Confirmed] }};
         {ok, discarded} ->
-            %% Message was discarded while we were a mirror.
-            {{true, nack}, State #state { seen_status = maps:remove(MsgId, SS) }}
+            %% Message was discarded while we were a mirror, for example
+            %% by being rejected for overflow, delivered to a consumer
+            %% that does not ack, or dropped under a zero TTL.
+            {{true, discarded}, State #state { seen_status = maps:remove(MsgId, SS) }}
     end.
 
 set_queue_mode(Mode, State = #state { gm                  = GM,
