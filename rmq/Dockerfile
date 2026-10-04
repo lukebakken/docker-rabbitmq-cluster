@@ -9,14 +9,14 @@ COPY --chown=rabbitmq:rabbitmq enabled_plugins /etc/rabbitmq/
 COPY --chown=rabbitmq:rabbitmq rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
 COPY --chown=rabbitmq:rabbitmq definitions.json /etc/rabbitmq/definitions.json
 
-# When CMQ_FIX=true, replace the image's rabbit_amqqueue_process.beam with one compiled from
-# cmq-fix/rabbit_amqqueue_process.erl, against this image's own headers and Erlang release.
-COPY cmq-fix/rabbit_amqqueue_process.erl /tmp/cmq-fix/
+# When CMQ_FIX=true, replace the image's beams for the modules in cmq-fix/ with ones compiled
+# from those sources, against this image's own headers and Erlang release.
+COPY cmq-fix/*.erl /tmp/cmq-fix/
 RUN if [ "$CMQ_FIX" = "true" ]; then \
         ERL_LIBS=/opt/rabbitmq/plugins erlc -Werror +debug_info \
             -I /opt/rabbitmq/plugins/rabbit-3.13.7/include \
             -o /opt/rabbitmq/plugins/rabbit-3.13.7/ebin \
-            /tmp/cmq-fix/rabbit_amqqueue_process.erl; \
+            /tmp/cmq-fix/*.erl; \
     fi; \
     rm -rf /tmp/cmq-fix
 

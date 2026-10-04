@@ -716,19 +716,8 @@ maybe_deliver_or_enqueue(Delivery = #delivery{message = Message},
     {IsDuplicate, BQS1} = BQ:is_duplicate(Message, BQS),
     State1 = State#q{backing_queue_state = BQS1},
     case IsDuplicate of
-        false ->
-            maybe_reject_or_enqueue(Delivery, Delivered, false, State1);
-        {true, reject} ->
-            handle_duplicate(IsDuplicate, Delivery, Delivered, State1);
-        _ ->
-            %% rabbit_mirror_queue_master settles a dropped duplicate's
-            %% confirm through msg_id_to_channel, so record it (or send it,
-            %% for a transient message) before dropping, as was done before
-            %% is_duplicate moved ahead of send_or_record_confirm in 3.8.0.
-            %% Without this a publisher using confirms never hears about the
-            %% message.
-            {_Confirm, State2} = send_or_record_confirm(Delivery, State1),
-            handle_duplicate(IsDuplicate, Delivery, Delivered, State2)
+        false -> maybe_reject_or_enqueue(Delivery, Delivered, false, State1);
+        _     -> handle_duplicate(IsDuplicate, Delivery, Delivered, State1)
     end;
 maybe_deliver_or_enqueue(Delivery, Delivered, State) ->
     send_mandatory(Delivery), %% must do this before confirms
@@ -782,7 +771,27 @@ handle_duplicate({true, drop}, _Delivery, _Delivered, State) ->
     State;
 handle_duplicate({true, reject}, Delivery, Delivered, State) ->
     %% Drop publish, and nack it if the publisher uses confirms
-    send_reject_publish(Delivery, Delivered, State).
+    send_reject_publish(Delivery, Delivered, State);
+%% {true, confirm} and {true, nack} come only from rabbit_mirror_queue_master,
+%% for a channel's copy of a message a promoted leader saw via GM as a mirror.
+handle_duplicate({true, confirm}, Delivery, _Delivered, State) ->
+    %% The message is in the queue: confirm it now (transient message or
+    %% non-durable queue) or when drain_confirmed/1 returns it.
+    {_Confirm, State1} = send_or_record_confirm(Delivery, State),
+    State1;
+handle_duplicate({true, nack}, Delivery, _Delivered, State) ->
+    %% The previous leader discarded the message, possibly by rejecting it,
+    %% so nack it rather than risk confirming a message that is in no queue.
+    nack_duplicate(Delivery, State).
+
+nack_duplicate(#delivery{confirm    = true,
+                         sender     = SenderPid,
+                         msg_seq_no = MsgSeqNo}, State = #q{q = Q}) ->
+    ok = rabbit_classic_queue:send_rejection(SenderPid, amqqueue:get_name(Q),
+                                             MsgSeqNo),
+    State;
+nack_duplicate(#delivery{confirm = false}, State) ->
+    State.
 
 deliver_or_enqueue(Delivery = #delivery{message = Message,
                                         sender  = SenderPid,

@@ -24,6 +24,6 @@ make watch
 
 Control, with publisher confirms: `make reset-queue`, then `docker compose --profile confirm up publisher-confirm consumer`.
 
-With the fix: `make down`, then `CMQ_FIX=true make up`, then `make reset-queue` and `docker compose up publisher-noconfirm consumer`. `CMQ_FIX=true` compiles `rmq/cmq-fix/rabbit_amqqueue_process.erl` over the image's module.
+With the fix: `make down`, then `CMQ_FIX=true make up`, then `make reset-queue` and `docker compose up publisher-noconfirm consumer`. `CMQ_FIX=true` compiles each module in `rmq/cmq-fix/` over the image's copy of it.
 
 Run `make reset-queue` after any cluster restart: the restarted queue keeps its previous, dead mirror processes in its record and runs unmirrored.
