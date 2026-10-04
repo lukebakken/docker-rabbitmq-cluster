@@ -733,7 +733,7 @@ maybe_reject_or_enqueue(Delivery = #delivery{message = Message},
                                    dlx_routing_key     = RK}) ->
     case {will_overflow(Delivery, State), Overflow} of
         {true, 'reject-publish'} ->
-            %% Drop publish, and nack it if the publisher uses confirms
+            %% Drop publish, and nack it if the publisher uses confirms or a transaction
             send_reject_publish(Delivery, Delivered, State);
         {true, 'reject-publish-dlx'} ->
             %% Publish to DLX
@@ -748,7 +748,7 @@ maybe_reject_or_enqueue(Delivery = #delivery{message = Message},
               fun () -> rabbit_global_counters:messages_dead_lettered(maxlen, rabbit_classic_queue,
                                                                       disabled, 1)
               end),
-            %% Drop publish, and nack it if the publisher uses confirms
+            %% Drop publish, and nack it if the publisher uses confirms or a transaction
             send_reject_publish(Delivery, Delivered, State);
         _ ->
             {IsDuplicate, BQS1} = BQ:is_duplicate(Message, BQS),
@@ -756,7 +756,7 @@ maybe_reject_or_enqueue(Delivery = #delivery{message = Message},
             case IsDuplicate of
                 true -> State1;
                 {true, drop} -> State1;
-                %% Drop publish, and nack it if the publisher uses confirms
+                %% Drop publish, and nack it if the publisher uses confirms or a transaction
                 {true, reject} ->
                     send_reject_publish(Delivery, Delivered, State1);
                 %% Enqueue and maybe drop head later
@@ -766,15 +766,15 @@ maybe_reject_or_enqueue(Delivery = #delivery{message = Message},
     end.
 
 settle_seen({true, confirm}, Delivery, State) ->
-    %% The previous leader enqueued the message.
+    %% The previous leader published the message.
     {_Confirm, State1} = send_or_record_confirm(Delivery, State),
     State1;
 %% The previous leader discarded the message, for example by rejecting it
 %% for overflow, delivering it to a consumer that does not ack, or dropping
 %% it under a zero TTL, and the GM discard does not say which. If it
 %% rejected the message and its nack was lost with its node, a confirm
-%% would report as accepted a message that is in no queue, so nack it: at
-%% worst the publisher sends it again.
+%% would report as accepted a message this queue does not hold, so nack
+%% it: at worst the publisher sends it again, or its transaction fails.
 settle_seen({true, discarded}, #delivery{confirm    = true,
                                          sender     = SenderPid,
                                          msg_seq_no = MsgSeqNo},
