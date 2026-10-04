@@ -707,6 +707,7 @@ maybe_deliver_or_enqueue(Delivery = #delivery{message = Message},
                          Delivered,
                          State = #q{backing_queue       = rabbit_mirror_queue_master,
                                     backing_queue_state = BQS}) ->
+    send_mandatory(Delivery), %% must do this before confirms
     %% A promoted leader can receive a channel's copy of a message that
     %% is in its seen_status because it arrived via GM first. Look it up
     %% before the overflow check: rejecting such a copy can call
@@ -717,10 +718,10 @@ maybe_deliver_or_enqueue(Delivery = #delivery{message = Message},
             maybe_reject_or_enqueue(Delivery, Delivered,
                                     State#q{backing_queue_state = BQS1});
         {Seen, BQS1} ->
-            send_mandatory(Delivery), %% must do this before confirms
             settle_seen(Seen, Delivery, State#q{backing_queue_state = BQS1})
     end;
 maybe_deliver_or_enqueue(Delivery, Delivered, State) ->
+    send_mandatory(Delivery), %% must do this before confirms
     maybe_reject_or_enqueue(Delivery, Delivered, State).
 
 maybe_reject_or_enqueue(Delivery = #delivery{message = Message},
@@ -730,7 +731,6 @@ maybe_reject_or_enqueue(Delivery = #delivery{message = Message},
                                    backing_queue_state = BQS,
                                    dlx                 = DLX,
                                    dlx_routing_key     = RK}) ->
-    send_mandatory(Delivery), %% must do this before confirms
     case {will_overflow(Delivery, State), Overflow} of
         {true, 'reject-publish'} ->
             %% Drop publish, and nack it if the publisher uses confirms
@@ -769,38 +769,20 @@ settle_seen({true, confirm}, Delivery, State) ->
     %% The previous leader enqueued the message.
     {_Confirm, State1} = send_or_record_confirm(Delivery, State),
     State1;
-settle_seen({true, discarded}, Delivery, State) ->
-    %% If this queue rejects publishes for overflow, the previous leader
-    %% may have discarded the message by rejecting it, and its nack may
-    %% have been lost with its node: nack it, so that at worst the
-    %% publisher sends it again. Otherwise the previous leader did not
-    %% reject it for overflow, so confirm it. The underlying BQ never
-    %% confirms a discarded message, so neither is recorded.
-    case can_reject(State) of
-        true  -> reject_seen(Delivery, State);
-        false -> confirm_seen(Delivery, State)
-    end.
-
-can_reject(#q{max_length = undefined, max_bytes = undefined}) ->
-    false;
-can_reject(#q{overflow = Overflow}) ->
-    Overflow =:= 'reject-publish' orelse Overflow =:= 'reject-publish-dlx'.
-
-reject_seen(#delivery{confirm    = true,
-                      sender     = SenderPid,
-                      msg_seq_no = MsgSeqNo}, State = #q{q = Q}) ->
+%% The previous leader discarded the message, for example by rejecting it
+%% for overflow, delivering it to a consumer that does not ack, or dropping
+%% it under a zero TTL, and the GM discard does not say which. If it
+%% rejected the message and its nack was lost with its node, a confirm
+%% would report as accepted a message that is in no queue, so nack it: at
+%% worst the publisher sends it again.
+settle_seen({true, discarded}, #delivery{confirm    = true,
+                                         sender     = SenderPid,
+                                         msg_seq_no = MsgSeqNo},
+            State = #q{q = Q}) ->
     ok = rabbit_classic_queue:send_rejection(SenderPid, amqqueue:get_name(Q),
                                              MsgSeqNo),
     State;
-reject_seen(#delivery{confirm = false}, State) ->
-    State.
-
-confirm_seen(#delivery{confirm    = true,
-                       sender     = SenderPid,
-                       msg_seq_no = MsgSeqNo}, State = #q{q = Q}) ->
-    confirm_to_sender(SenderPid, amqqueue:get_name(Q), [MsgSeqNo]),
-    State;
-confirm_seen(#delivery{confirm = false}, State) ->
+settle_seen({true, discarded}, #delivery{confirm = false}, State) ->
     State.
 
 deliver_or_enqueue(Delivery = #delivery{message = Message,

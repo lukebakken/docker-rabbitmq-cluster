@@ -475,21 +475,16 @@ invoke(Mod, Fun, State = #state { backing_queue       = BQ,
                                   backing_queue_state = BQS }) ->
     State #state { backing_queue_state = BQ:invoke(Mod, Fun, BQS) }.
 
+%% rabbit_amqqueue_process calls is_seen/2 before this, so only the
+%% underlying BQ is consulted here.
 is_duplicate(Message, State = #state { backing_queue       = BQ,
                                        backing_queue_state = BQS }) ->
-    case is_seen(Message, State) of
-        {false, State1} ->
-            %% We permit the underlying BQ to have a peek at it, but
-            %% only if we ourselves are not filtering out the msg.
-            {Result, BQS1} = BQ:is_duplicate(Message, BQS),
-            {Result, State1 #state { backing_queue_state = BQS1 }};
-        Seen ->
-            Seen
-    end.
+    {Result, BQS1} = BQ:is_duplicate(Message, BQS),
+    {Result, State #state { backing_queue_state = BQS1 }}.
 
-%% The seen_status half of is_duplicate/2, without consulting the
-%% underlying BQ. rabbit_amqqueue_process calls it before its overflow
-%% check.
+%% Looks the message up in seen_status. rabbit_amqqueue_process calls
+%% this before its overflow check, and calls is_duplicate/2 only on a
+%% miss.
 is_seen(Message, State = #state { seen_status = SS,
                                   confirmed   = Confirmed }) ->
     MsgId = mc:get_annotation(id, Message),
@@ -524,9 +519,7 @@ is_seen(Message, State = #state { seen_status = SS,
             {{true, confirm}, State #state { seen_status = maps:remove(MsgId, SS),
                                              confirmed = [MsgId | Confirmed] }};
         {ok, discarded} ->
-            %% Message was discarded while we were a mirror, for example
-            %% by being rejected for overflow, delivered to a consumer
-            %% that does not ack, or dropped under a zero TTL.
+            %% Message was discarded while we were a mirror.
             {{true, discarded}, State #state { seen_status = maps:remove(MsgId, SS) }}
     end.
 
