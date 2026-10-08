@@ -4,22 +4,62 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-# shellcheck disable=SC2155,SC2034
-readonly dir="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+# Every docker compose call below is bare, so it would otherwise resolve the
+# project from the caller's working directory and roll somebody else's cluster.
+cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 
 readonly services=(rmq0 rmq1 rmq2)
 
+# Set by the Makefile. Only used to tell an upgrade apart from a restart, so an
+# empty value weakens the final check rather than breaking the roll.
+readonly expected_version="${RABBITMQ_EXPECTED_VERSION:-}"
+
 assert_all_feature_flags_enabled() {
-    local svc="$1" disabled
-    disabled="$(docker compose exec -T "$svc" rabbitmqctl list_feature_flags name state --formatter=csv 2>/dev/null |
-        awk -F, 'NR>1 && $2!="\"enabled\"" {print $1}')"
+    local svc="$1" flags report total disabled flag
+
+    # tr strips the carriage returns a TTY-allocating exec would add, which the
+    # state comparison below is otherwise sensitive to.
+    if ! flags="$(docker compose exec -T "$svc" rabbitmqctl --quiet list_feature_flags name state --formatter=csv | tr -d '\r')"
+    then
+        echo "[ERROR] cannot read feature flags from $svc" >&2
+        return 1
+    fi
+
+    # One pass emits the data row count on the first line and any disabled flag
+    # names after it, so the count and the names cannot disagree about which
+    # rows are data. The header is skipped by its contents rather than by line
+    # number, which a stray line on stdout would shift. awk also exits 0 on no
+    # matches, where grep -c returns 1 and under errexit would kill the script
+    # before the count could be reported.
+    report="$(awk -F, '
+        /^"/ && $1 != "\"name\"" {
+            total++
+            if ($2 != "\"enabled\"") {
+                gsub(/"/, "", $1)
+                disabled = disabled "\n" $1
+            }
+        }
+        END { print total + 0 disabled }' <<< "$flags")"
+
+    total="$(head -n 1 <<< "$report")"
+    if [[ "$total" -lt 1 ]]
+    then
+        echo "[ERROR] $svc reported no feature flags" >&2
+        return 1
+    fi
+
+    disabled="$(tail -n +2 <<< "$report")"
     if [[ -n "$disabled" ]]
     then
         echo "[ERROR] these feature flags are not enabled, run 'make enable-ff' first:" >&2
-        echo "$disabled" >&2
+        while IFS= read -r flag
+        do
+            echo "  $flag" >&2
+        done <<< "$disabled"
         return 1
     fi
-    echo "[INFO] all feature flags are enabled"
+
+    echo "[INFO] all $total feature flags are enabled"
 }
 
 await_startup() {
@@ -34,6 +74,49 @@ await_startup() {
     done
     echo "[ERROR] $svc did not finish starting" >&2
     return 1
+}
+
+node_version() {
+    local svc="$1" version
+
+    # Assigned rather than interpolated into an echo, so that a failure here
+    # aborts instead of printing an empty version and draining the next node.
+    version="$(docker compose exec -T "$svc" rabbitmqctl --quiet version | tr -d '\r')"
+    if [[ -z "$version" ]]
+    then
+        echo "[ERROR] $svc reported no version" >&2
+        return 1
+    fi
+
+    echo "$version"
+}
+
+assert_every_node_upgraded() {
+    local svc version first=''
+
+    for svc in "${services[@]}"
+    do
+        version="$(node_version "$svc")"
+        echo "[INFO] $svc: running $version"
+
+        if [[ -n "$first" && "$version" != "$first" ]]
+        then
+            echo "[ERROR] cluster is running mixed versions: $first and $version" >&2
+            return 1
+        fi
+        first="$version"
+
+        if [[ -n "$expected_version" && "$version" != "$expected_version" ]]
+        then
+            echo "[ERROR] $svc is running $version, expected $expected_version" >&2
+            return 1
+        fi
+    done
+
+    if [[ -z "$expected_version" ]]
+    then
+        echo "[WARN] RABBITMQ_EXPECTED_VERSION is unset, so a restart that upgraded nothing would still pass" >&2
+    fi
 }
 
 echo "[INFO] upgrading cluster!"
@@ -53,8 +136,15 @@ do
     docker compose up --detach "$SVC"
 
     await_startup "$SVC"
-    echo "[INFO] $SVC: now running $(docker compose exec -T "$SVC" rabbitmqctl version | tr -d '\r')"
 done
 
-echo "[INFO] upgrade complete"
+# A rolling upgrade leaves every queue and stream leader on the nodes that were
+# drained first, so the cluster is lopsided until this runs.
+echo "[INFO] rebalancing queue and stream leaders"
+docker compose exec -T "${services[0]}" rabbitmq-upgrade post_upgrade
+
+assert_every_node_upgraded
 docker compose exec -T "${services[0]}" rabbitmqctl cluster_status
+
+# Last, so that it cannot claim success for a cluster that failed a check above.
+echo "[INFO] upgrade complete"

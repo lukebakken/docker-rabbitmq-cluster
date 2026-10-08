@@ -1,4 +1,7 @@
-ARG RABBITMQ_DOCKER_TAG=rabbitmq:4-management
+# Deliberately has no default: the Makefile is the one place that decides which
+# version is built, and a default here would silently win whenever a build runs
+# without --build-arg.
+ARG RABBITMQ_DOCKER_TAG
 
 FROM ${RABBITMQ_DOCKER_TAG}
 
