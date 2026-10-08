@@ -1,0 +1,7 @@
+# Drops haproxy's host port publishing so the test can run alongside another
+# RabbitMQ container that already holds 5672/15672 on the host. perf-test and
+# stream-perf-test reach haproxy over the rabbitnet network, so nothing in the
+# test depends on those ports being published.
+services:
+  haproxy:
+    ports: !reset []
